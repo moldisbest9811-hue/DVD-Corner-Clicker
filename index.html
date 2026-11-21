@@ -123,12 +123,12 @@ cornerStreak=Math.max(0,Number(saved.cornerStreak)||0);rareEvents=Math.max(0,Num
 theme=themes.some(t=>t[0].toLowerCase()===saved.theme&&lifetimeHits>=t[1])?saved.theme:'classic';
 const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0},{id:'philips',name:'Philips',unlock:10},{id:'bluray',name:'Blu-ray Disc',unlock:50},{id:'hddvd',name:'HD DVD',unlock:100},{id:'cd',name:'Compact Disc',unlock:250},{id:'vhs',name:'VHS',unlock:500}];
 const logoAssets={
-dvd:'https://upload.wikimedia.org/wikipedia/commons/e/e7/DVD-Video_Logo.svg',
-philips:'https://upload.wikimedia.org/wikipedia/commons/8/8c/Philips_logo.svg',
-bluray:'https://upload.wikimedia.org/wikipedia/commons/1/14/Blu-ray_Disc.svg',
+dvd:'./assets/logos/dvd.svg',
+philips:'./assets/logos/philips.svg',
+bluray:'./assets/logos/blu-ray.svg',
 hddvd:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',
 cd:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',
-vhs:'https://upload.wikimedia.org/wikipedia/commons/a/aa/VHS_logo.svg'
+vhs:'./assets/logos/vhs.svg'
 };
 const logoImages={},logoImageErrors={};
 Object.entries(logoAssets).forEach(([id,src])=>{
