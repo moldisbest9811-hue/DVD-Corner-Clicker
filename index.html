@@ -133,7 +133,8 @@ const logoImages={},logoImageErrors={};
 Object.entries(logoAssets).forEach(([id,src])=>{const image=new Image();image.onload=()=>{logoImages[id]=image;};image.onerror=()=>{logoImageErrors[id]=true;console.warn('Could not load logo asset:',id,src);};image.src=src;});
 activeLogo=logoTypes.some(v=>v.id===saved.activeLogo&&lifetimeHits>=v.unlock)?saved.activeLogo:'dvd';
 for(let i=0;i<Math.min(19,upgrades[3].level);i++){let n=i+1;logos.push({id:++nextId,x:(95+n*137)%760,y:(55+n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999})}
-const money=n=>'Math.pow(1.15,upgrades[0].level)*bounceSpeed()*Math.pow(1.1,endgameUpgrades[1].level),payout=()=>10*Math.pow(2,upgrades[1].level)*Math.pow(1.5,prestiges)*Math.pow(1.25,endgameUpgrades[0].level);
+const money=n=>'$'+Math.floor(n).toLocaleString(),cost=u=>Math.floor(u.base*Math.pow(1.62,u.level));
+const activeDim=()=>dimensions.find(d=>d.id===activeDimension)||dimensions[0],factoryRate=()=>factoryLevel*factoryLevel*2500*Math.pow(1.25,cosmicShards);
 const today=()=>new Date().toLocaleDateString('en-CA');
 let daily=saved.daily&&saved.daily.date===today()?saved.daily:{date:today(),type:Math.floor(Date.now()/86400000)%3,baseHits:lifetimeHits,baseWalls:wallHits,buys:0,claimed:false};
 const dailySpecs=[{name:'Corner Collector',desc:'Land 5 corner hits today.',goal:5,reward:750},{name:'Wall Runner',desc:'Bounce off 100 walls today.',goal:100,reward:900},{name:'Upgrade Spree',desc:'Buy 2 upgrades today.',goal:2,reward:1100}];
