@@ -90,7 +90,22 @@ function updateThemeStatus(){document.getElementById('themeStatus').textContent=
 function updateUI(){document.getElementById('cash').textContent=money(cash);document.getElementById('hits').textContent=hits.toLocaleString();document.getElementById('wallHits').textContent=wallHits.toLocaleString();document.getElementById('perHit').textContent=money(payout());document.getElementById('speed').textContent=speed().toFixed(2)+'×';[...document.querySelectorAll('.shop-card button')].forEach((b,i)=>b.disabled=cash<cost(upgrades[i]));renderAchievements();renderThemes()}
 function hit(logo){hits++;let reward=payout();if(logo.id===goldId){reward*=10;goldId=null;goldUntil=0;toastMsg('✨ GOLDEN CORNER! +'+money(reward))}else toastMsg('CORNER HIT! +'+money(reward));cash+=reward;achievements.filter(a=>hits===a[1]).forEach(a=>{cash+=a[2];toastMsg('ACHIEVEMENT: '+a[0]+' +'+money(a[2]))});save();updateUI()}
 function colorFor(l,t){if(l.id===goldId&&t<goldUntil)return '#ffd447';if(theme==='rainbow')return 'hsl('+(Math.floor(t/8+l.id*73)%360)+' 100% 62%)';if(theme==='neon')return ['#00f5ff','#ff00d4','#b6ff00','#8b5cff'][colorIndex%4];return colors[colorIndex%colors.length]}
-function draw(l,t){if(!ready)return;let c=colorFor(l,t);tc.clearRect(0,0,512,307);tc.drawImage(img,0,0,512,307);tc.globalCompositeOperation='source-in';tc.fillStyle=c;tc.fillRect(0,0,512,307);tc.globalCompositeOperation='source-over';ctx.save();ctx.shadowColor=c;ctx.shadowBlur=l.id===goldId&&t<goldUntil?28:15;ctx.drawImage(tint,l.x,l.y,l.w,l.h);ctx.restore()}
+function draw(l,t){
+  let c=colorFor(l,t);
+  ctx.save();ctx.shadowColor=c;ctx.shadowBlur=l.id===goldId&&t<goldUntil?28:15;
+  if(ready){
+    tc.clearRect(0,0,512,307);tc.drawImage(img,0,0,512,307);
+    tc.globalCompositeOperation='source-in';tc.fillStyle=c;tc.fillRect(0,0,512,307);tc.globalCompositeOperation='source-over';
+    ctx.drawImage(tint,l.x,l.y,l.w,l.h);
+  }else{
+    // Visible fallback while the imported SVG loads, or if the host blocks it.
+    ctx.fillStyle=c;ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.font='900 67px Arial, sans-serif';ctx.fillText('DVD',l.x+l.w/2,l.y+38);
+    ctx.beginPath();ctx.ellipse(l.x+l.w/2,l.y+38,67,25,-.08,0,Math.PI*2);ctx.lineWidth=3;ctx.strokeStyle=c;ctx.stroke();
+    ctx.font='900 17px Arial, sans-serif';ctx.fillText('VIDEO',l.x+l.w/2,l.y+72);
+  }
+  ctx.restore();
+}
 function updateBounceCount(){document.getElementById('wallHits').textContent=wallHits.toLocaleString()}
 function frame(t){let dt=Math.min((t-last)/16.667||1,2.5);last=t;ctx.clearRect(0,0,W,H);if(t>=nextGold){goldId=logos[Math.floor(Math.random()*logos.length)].id;goldUntil=t+12000;nextGold=t+45000+Math.random()*45000;toastMsg('✨ GOLDEN DVD APPEARED!')}
 logos.forEach(l=>{l.x+=l.vx*speed()*dt;l.y+=l.vy*speed()*dt;let hx=false,hy=false;if(l.x<=0){l.x=0;l.vx=Math.abs(l.vx);hx=true}else if(l.x+l.w>=W){l.x=W-l.w;l.vx=-Math.abs(l.vx);hx=true}if(l.y<=0){l.y=0;l.vy=Math.abs(l.vy);hy=true}else if(l.y+l.h>=H){l.y=H-l.h;l.vy=-Math.abs(l.vy);hy=true}if(hx||hy){wallHits++;colorIndex=(colorIndex+1)%colors.length;save();updateBounceCount()}if(hx&&hy)hit(l);draw(l,t)});requestAnimationFrame(frame)}
