@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#050505">
+  <title>DVD Corner Clicker</title>
+  <style>
+    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#080808; color:#f5f5f5; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at top,#171717 0,#080808 55%); }
+    .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; padding:32px 0 56px; }
+    header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
+    h1 { font-size:clamp(1.5rem,4vw,2.35rem); margin:0; letter-spacing:-.06em; }
+    .sub { color:#929292; margin:5px 0 0; font-size:.9rem; }
+    .pill { border:1px solid #333; border-radius:999px; padding:8px 12px; color:#aaa; font-size:.78rem; white-space:nowrap; }
+    .screen { position:relative; border:1px solid #303030; border-radius:18px; overflow:hidden; background:#000; box-shadow:0 22px 80px #000b, inset 0 0 0 1px #ffffff08; }
+    canvas { display:block; width:100%; height:auto; aspect-ratio:16/9; }
+    .screen-label { position:absolute; left:16px; top:14px; color:#666; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; pointer-events:none; }
+    .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0 26px; }
+    .stat,.shop-card { border:1px solid #292929; background:linear-gradient(145deg,#171717,#101010); border-radius:14px; padding:15px; }
+    .stat span { display:block; color:#858585; font-size:.75rem; margin-bottom:7px; }
+    .stat strong { font-size:clamp(1.1rem,3vw,1.6rem); letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
+    .section-head { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 0 12px; }
+    h2 { margin:0; font-size:1.2rem; letter-spacing:-.03em; }
+    .hint { color:#777; font-size:.8rem; }
+    .shop { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+    .shop-card { display:flex; flex-direction:column; min-height:172px; }
+    .shop-card h3 { margin:0 0 6px; font-size:1rem; }
+    .shop-card p { color:#929292; font-size:.82rem; line-height:1.45; margin:0 0 14px; flex:1; }
+    button { border:1px solid #444; border-radius:9px; background:#f0f0f0; color:#111; font-weight:750; padding:10px 12px; cursor:pointer; transition:transform .12s, opacity .12s; }
+    button:hover:not(:disabled) { transform:translateY(-1px); }
+    button:disabled { cursor:not-allowed; opacity:.35; }
+    .buy-row { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#cfcfcf; font-size:.78rem; }
+    .buy-row button { min-width:94px; }
+    .footer { color:#686868; font-size:.75rem; text-align:center; margin-top:24px; }
+    .toast { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-weight:850; font-size:clamp(1rem,3vw,1.7rem); text-shadow:0 2px 20px #fff8; opacity:0; pointer-events:none; }
+    .toast.show { animation:pop .9s ease-out; }
+    @keyframes pop { 0%{opacity:0;transform:translate(-50%,-30%) scale(.8)} 20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)} 100%{opacity:0;transform:translate(-50%,-80%) scale(1)} }
+    @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}.shop{grid-template-columns:1fr 1fr}}
+    @media(max-width:480px){.shop{grid-template-columns:1fr}.wrap{width:calc(100% - 22px);padding-top:20px}.pill{display:none}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header>
+      <div><h1>DVD Corner Clicker</h1><p class="sub">The corner is waiting. Let it bounce.</p></div>
+      <div class="pill">IDLE / INCREMENTAL · v0.1</div>
+    </header>
+    <section class="screen" aria-label="DVD screensaver">
+      <div class="screen-label">DVD VIDEO</div>
+      <canvas id="screen" width="960" height="540"></canvas>
+      <div id="toast" class="toast">CORNER HIT! +$10</div>
+    </section>
+    <section class="stats" aria-live="polite">
+      <div class="stat"><span> CASH </span><strong id="cash">$0</strong></div>
+      <div class="stat"><span>CORNER HITS</span><strong id="hits">0</strong></div>
+      <div class="stat"><span>PER HIT</span><strong id="perHit">$10</strong></div>
+      <div class="stat"><span>DVD SPEED</span><strong id="speed">1.0×</strong></div>
+    </section>
+    <div class="section-head"><div><h2>Upgrade shop</h2><div class="hint">Spend your corner cash to improve the bounce.</div></div></div>
+    <section class="shop" id="shop"></section>
+    <p class="footer">Progress saves automatically in this browser. Corner hits require the logo to reach both adjoining screen edges on the same bounce.</p>
+  </main>
+<script>
+(() => {
+  const canvas = document.getElementById('screen');
+  const ctx = canvas.getContext('2d');
+  const toast = document.getElementById('toast');
+  const W = canvas.width, H = canvas.height;
+  const logo = { w: 154, h: 64, x: 180, y: 130, vx: 2.45, vy: 1.83 };
+  const colors = ['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];
+  let colorIndex = 0, cash = 0, hits = 0, lastFrame = 0;
+  const upgrades = [
+    {id:'speed', name:'Turbo Bounce', desc:'Increase the DVD logo movement speed.', base:35, level:0, effect:'+15% speed per level'},
+    {id:'payout', name:'Corner Bonus', desc:'Earn more cash every time you nail a corner.', base:50, level:0, effect:'+100% cash per hit'},
+    {id:'extra', name:'Lucky Timing', desc:'Slightly widens the exact-corner detection window.', base:90, level:0, effect:'+1 frame of corner grace'}
+  ];
+  const saved = (() => { try { return JSON.parse(localStorage.getItem('dvd-corner-clicker-save') || 'null'); } catch { return null; } })();
+  if (saved) {
+    cash = Number(saved.cash) || 0; hits = Number(saved.hits) || 0;
+    upgrades.forEach(u => { u.level = Math.max(0, Number(saved.levels?.[u.id]) || 0); });
+  }
+  const money = n => '$' + Math.floor(n).toLocaleString();
+  const cost = u => Math.floor(u.base * Math.pow(1.62, u.level));
+  const speedMult = () => Math.pow(1.15, upgrades[0].level);
+  const payout = () => 10 * Math.pow(2, upgrades[1].level);
+  function save(){ localStorage.setItem('dvd-corner-clicker-save', JSON.stringify({cash,hits,levels:Object.fromEntries(upgrades.map(u=>[u.id,u.level]))})); }
+  function renderShop(){
+    const shop = document.getElementById('shop');
+    shop.innerHTML = '';
+    upgrades.forEach(u => {
+      const c = cost(u);
+      const card = document.createElement('article'); card.className = 'shop-card';
+      const title = document.createElement('h3'); title.textContent = u.name + ' · Lv. ' + u.level;
+      const desc = document.createElement('p'); desc.textContent = u.desc + ' ' + u.effect + '.';
+      const row = document.createElement('div'); row.className = 'buy-row';
+      const price = document.createElement('span'); price.textContent = money(c);
+      const btn = document.createElement('button'); btn.textContent = 'Buy';
+      btn.disabled = cash < c; btn.addEventListener('click', () => {
+        if (cash < cost(u)) return;
+        cash -= cost(u); u.level++; save(); updateUI(); renderShop();
+      });
+      row.append(price,btn); card.append(title,desc,row); shop.append(card);
+    });
+  }
+  function updateUI(){
+    document.getElementById('cash').textContent = money(cash);
+    document.getElementById('hits').textContent = hits.toLocaleString();
+    document.getElementById('perHit').textContent = money(payout());
+    document.getElementById('speed').textContent = speedMult().toFixed(2) + '×';
+    [...document.querySelectorAll('.shop-card button')].forEach((b,i)=>b.disabled=cash<cost(upgrades[i]));
+  }
+  function showToast(amount){
+    toast.textContent = 'CORNER HIT! +' + money(amount);
+    toast.classList.remove('show'); void toast.offsetWidth; toast.classList.add('show');
+  }
+  function drawLogo(){
+    const c = colors[colorIndex];
+    ctx.save();
+    ctx.shadowColor = c; ctx.shadowBlur = 15;
+    ctx.fillStyle = c; ctx.strokeStyle = c;
+    ctx.lineWidth = 3;
+    ctx.font = '900 45px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('DVD', logo.x + logo.w/2, logo.y + 29);
+    ctx.beginPath(); ctx.ellipse(logo.x+logo.w/2,logo.y+56,36,4,0,0,Math.PI*2); ctx.stroke();
+    ctx.restore();
+  }
+  function frame(t){
+    const dt = Math.min((t-lastFrame)/16.667 || 1, 2.5); lastFrame=t;
+    ctx.clearRect(0,0,W,H);
+    logo.x += logo.vx * speedMult() * dt;
+    logo.y += logo.vy * speedMult() * dt;
+    let hitX=false, hitY=false;
+    if(logo.x <= 0){logo.x=0;logo.vx=Math.abs(logo.vx);hitX=true;}
+    else if(logo.x+logo.w >= W){logo.x=W-logo.w;logo.vx=-Math.abs(logo.vx);hitX=true;}
+    if(logo.y <= 0){logo.y=0;logo.vy=Math.abs(logo.vy);hitY=true;}
+    else if(logo.y+logo.h >= H){logo.y=H-logo.h;logo.vy=-Math.abs(logo.vy);hitY=true;}
+    if(hitX && hitY){
+      hits++; const reward=payout(); cash+=reward; colorIndex=(colorIndex+1)%colors.length;
+      showToast(reward); save(); updateUI();
+    }
+    drawLogo();
+    requestAnimationFrame(frame);
+  }
+  renderShop(); updateUI(); requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
