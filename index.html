@@ -68,8 +68,8 @@
 <script>
 (()=>{
 const canvas=document.getElementById('screen'),ctx=canvas.getContext('2d'),toast=document.getElementById('toast'),W=canvas.width,H=canvas.height;
-const img=new Image();img.crossOrigin='anonymous';img.src='https://upload.wikimedia.org/wikipedia/commons/e/e7/DVD-Video_Logo.svg';
-const tint=document.createElement('canvas');tint.width=512;tint.height=307;const tc=tint.getContext('2d');let ready=false;img.onload=()=>ready=true;
+const img=new Image();img.src='https://upload.wikimedia.org/wikipedia/commons/e/e7/DVD-Video_Logo.svg';
+const tint=document.createElement('canvas');tint.width=512;tint.height=307;const tc=tint.getContext('2d');let ready=false;img.onload=()=>{ready=true;};img.onerror=()=>{ready=false;toastMsg('DVD logo failed to load. Refresh to retry.');};
 const colors=['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];
 const achievements=[['First Contact',1,25],['Corner Rookie',10,100],['Corner Hunter',50,500],['Perfect 100',100,1500],['Corner Machine',500,10000],['DVD Legend',1000,50000]];
 const themes=[['Classic',0],['Neon',25],['Rainbow',100]];
