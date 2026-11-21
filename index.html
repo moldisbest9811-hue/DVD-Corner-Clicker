@@ -68,7 +68,8 @@
   const ctx = canvas.getContext('2d');
   const toast = document.getElementById('toast');
   const W = canvas.width, H = canvas.height;
-  const logo = { w: 154, h: 64, x: 180, y: 130, vx: 2.45, vy: 1.83 };
+  // Bounding box covers the complete DVD VIDEO wordmark.
+  const logo = { w: 190, h: 88, x: 180, y: 130, vx: 2.45, vy: 1.83 };
   const colors = ['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];
   let colorIndex = 0, cash = 0, hits = 0, lastFrame = 0;
   const upgrades = [
@@ -117,13 +118,29 @@
   }
   function drawLogo(){
     const c = colors[colorIndex];
+    const cx = logo.x + logo.w / 2;
     ctx.save();
-    ctx.shadowColor = c; ctx.shadowBlur = 15;
-    ctx.fillStyle = c; ctx.strokeStyle = c;
-    ctx.lineWidth = 3;
-    ctx.font = '900 45px Arial, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('DVD', logo.x + logo.w/2, logo.y + 29);
-    ctx.beginPath(); ctx.ellipse(logo.x+logo.w/2,logo.y+56,36,4,0,0,Math.PI*2); ctx.stroke();
+    ctx.translate(logo.x, logo.y);
+    ctx.fillStyle = c;
+    ctx.strokeStyle = c;
+    ctx.shadowColor = c;
+    ctx.shadowBlur = 13;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+
+    // Classic DVD mark: italic DVD lettering, the sweeping disc arc,
+    // and the smaller VIDEO wordmark directly underneath.
+    ctx.font = 'italic 900 66px Arial Black, Arial, sans-serif';
+    ctx.fillText('DVD', logo.w / 2, 61);
+
+    ctx.lineWidth = 3.2;
+    ctx.beginPath();
+    ctx.ellipse(logo.w / 2, 22, 67, 14, -0.08, Math.PI * 1.03, Math.PI * 1.94);
+    ctx.stroke();
+
+    ctx.font = '700 17px Arial, sans-serif';
+    ctx.letterSpacing = '5px';
+    ctx.fillText('VIDEO', logo.w / 2, 84);
     ctx.restore();
   }
   function frame(t){
