@@ -123,12 +123,12 @@ cornerStreak=Math.max(0,Number(saved.cornerStreak)||0);rareEvents=Math.max(0,Num
 theme=themes.some(t=>t[0].toLowerCase()===saved.theme&&lifetimeHits>=t[1])?saved.theme:'classic';
 const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0},{id:'philips',name:'Philips',unlock:10},{id:'bluray',name:'Blu-ray Disc',unlock:50},{id:'hddvd',name:'HD DVD',unlock:100},{id:'cd',name:'Compact Disc',unlock:250},{id:'vhs',name:'VHS',unlock:500}];
 const logoAssets={
-dvd:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e7/DVD-Video_Logo.svg/512px-DVD-Video_Logo.svg.png',
-philips:'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8c/Philips_logo.svg/600px-Philips_logo.svg.png',
-bluray:'https://upload.wikimedia.org/wikipedia/commons/thumb/1/14/Blu-ray_Disc.svg/600px-Blu-ray_Disc.svg.png',
-hddvd:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/HD-DVD.svg/600px-HD-DVD.svg.png',
-cd:'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Compact_Disc_wordmark.svg/600px-Compact_Disc_wordmark.svg.png',
-vhs:'https://upload.wikimedia.org/wikipedia/commons/thumb/a/aa/VHS_logo.svg/600px-VHS_logo.svg.png'
+dvd:'https://upload.wikimedia.org/wikipedia/commons/e/e7/DVD-Video_Logo.svg',
+philips:'https://upload.wikimedia.org/wikipedia/commons/8/8c/Philips_logo.svg',
+bluray:'https://upload.wikimedia.org/wikipedia/commons/1/14/Blu-ray_Disc.svg',
+hddvd:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',
+cd:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',
+vhs:'https://upload.wikimedia.org/wikipedia/commons/a/aa/VHS_logo.svg'
 };
 const logoImages={},logoImageErrors={};
 Object.entries(logoAssets).forEach(([id,src])=>{
@@ -179,11 +179,12 @@ function draw(l,t){
     const dw=image.naturalWidth*scale,dh=image.naturalHeight*scale;
     ctx.drawImage(image,l.x+(l.w-dw)/2,l.y+(l.h-dh)/2,dw,dh);
   }else{
-    ctx.fillStyle='#222';
+    const failed=!!logoImageErrors[activeLogo];
+    ctx.fillStyle='#111';
     ctx.textAlign='center';
     ctx.textBaseline='middle';
-    ctx.font='bold 14px Arial,sans-serif';
-    ctx.fillText('Loading logo…',l.x+l.w/2,l.y+l.h/2);
+    ctx.font='bold 15px Arial,sans-serif';
+    ctx.fillText(failed?'Logo unavailable':(logoTypes.find(v=>v.id===activeLogo)?.name||'DVD'),l.x+l.w/2,l.y+l.h/2);
   }
   ctx.restore();
 }
