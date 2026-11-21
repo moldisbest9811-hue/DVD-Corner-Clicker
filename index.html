@@ -158,8 +158,11 @@
     else if(logo.x+logo.w >= W){logo.x=W-logo.w;logo.vx=-Math.abs(logo.vx);hitX=true;}
     if(logo.y <= 0){logo.y=0;logo.vy=Math.abs(logo.vy);hitY=true;}
     else if(logo.y+logo.h >= H){logo.y=H-logo.h;logo.vy=-Math.abs(logo.vy);hitY=true;}
+    // Every wall bounce changes the logo color; a corner hit is still
+    // rewarded only when the horizontal and vertical edges are hit together.
+    if(hitX || hitY) colorIndex=(colorIndex+1)%colors.length;
     if(hitX && hitY){
-      hits++; const reward=payout(); cash+=reward; colorIndex=(colorIndex+1)%colors.length;
+      hits++; const reward=payout(); cash+=reward;
       showToast(reward); save(); updateUI();
     }
     drawLogo();
