@@ -149,9 +149,7 @@
   }
   function frame(t){
     const dt = Math.min((t-lastFrame)/16.667 || 1, 2.5); lastFrame=t;
-    // Derive the active color directly from animation time so the cycle
-    // cannot get stuck if a frame is delayed or skipped.
-    colorIndex = Math.floor(t / 650) % colors.length;
+
     ctx.clearRect(0,0,W,H);
     logo.x += logo.vx * speedMult() * dt;
     logo.y += logo.vy * speedMult() * dt;
