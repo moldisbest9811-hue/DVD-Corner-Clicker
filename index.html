@@ -87,7 +87,7 @@
     logoReady = true;
   };
   const colors = ['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];
-  let colorIndex = 0, cash = 0, hits = 0, lastFrame = 0, lastColorChange = 0;
+  let colorIndex = 0, cash = 0, hits = 0, lastFrame = 0;
   const upgrades = [
     {id:'speed', name:'Turbo Bounce', desc:'Increase the DVD logo movement speed.', base:35, level:0, effect:'+15% speed per level'},
     {id:'payout', name:'Corner Bonus', desc:'Earn more cash every time you nail a corner.', base:50, level:0, effect:'+100% cash per hit'},
@@ -149,12 +149,9 @@
   }
   function frame(t){
     const dt = Math.min((t-lastFrame)/16.667 || 1, 2.5); lastFrame=t;
-    // Cycle through the DVD logo colors automatically while it bounces.
-    if (!lastColorChange) lastColorChange = t;
-    if (t - lastColorChange >= 1200) {
-      colorIndex = (colorIndex + Math.floor((t - lastColorChange) / 1200)) % colors.length;
-      lastColorChange = t;
-    }
+    // Derive the active color directly from animation time so the cycle
+    // cannot get stuck if a frame is delayed or skipped.
+    colorIndex = Math.floor(t / 650) % colors.length;
     ctx.clearRect(0,0,W,H);
     logo.x += logo.vx * speedMult() * dt;
     logo.y += logo.vy * speedMult() * dt;
