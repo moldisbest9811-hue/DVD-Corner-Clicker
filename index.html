@@ -59,6 +59,8 @@
       <div class="stat"><span>PER HIT</span><strong id="perHit">$10</strong></div>
       <div class="stat"><span>DVD SPEED</span><strong id="speed">1.0×</strong></div>
       <div class="stat"><span>WALL BOUNCES</span><strong id="wallHits">0</strong></div>
+      <div class="stat"><span>BOUNCE COMBO</span><strong id="bounceCombo">1.0×</strong></div>
+      <div class="stat"><span>SPEED STAGE</span><strong id="speedStage">1</strong></div>
     </section>
     <div class="section-head"><div><h2>Upgrade shop</h2><div class="hint">Spend your corner cash to improve the bounce.</div></div></div>
     <section class="shop" id="shop"></section>
@@ -85,21 +87,27 @@ const upgrades=[
 {id:'gold',name:'Golden Frequency',desc:'Golden DVDs appear more often.',base:400,level:0},
 {id:'magnet',name:'Corner Sense',desc:'Increase the corner connection window.',base:650,level:0}
 ];
-let cash=0,hits=0,wallHits=0,lifetimeHits=0,prestiges=0,colorIndex=0,theme='classic',nextId=1,goldId=null,goldUntil=0,last=0,dailyBuys=0;
+let cash=0,hits=0,wallHits=0,lifetimeHits=0,prestiges=0,colorIndex=0,theme='classic',nextId=1,goldId=null,goldUntil=0,last=0,dailyBuys=0,bounceStreak=0,lastBounceAt=0,shake=0;
+const particles=[],floaters=[];
+const comboMultiplier=()=>Math.min(5,1+Math.floor(bounceStreak/10)*0.25);
+const bounceSpeed=()=>Math.min(3,1+Math.floor(wallHits/25)*0.05);
+function burst(x,y,color,critical=false){const count=critical?48:18;for(let i=0;i<count;i++){let a=Math.random()*Math.PI*2,s=(critical?3:1.5)+Math.random()*(critical?8:4);particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:critical?55:34,max:critical?55:34,size:critical?2+Math.random()*5:2+Math.random()*3,color})}shake=Math.max(shake,critical?13:4)}
+function floatText(x,y,text,color){floaters.push({x,y,text,color,life:55,max:55})}
+function processWallBounce(l,x,y){bounceStreak++;lastBounceAt=performance.now();let mult=comboMultiplier(),critical=Math.random()<0.055;let reward=Math.max(1,Math.floor(mult*(critical?10:1)));cash+=reward;let color=critical?'#fff16a':colorFor(l,last);burst(x,y,color,critical);floatText(x,y,critical?'CRITICAL! +'+money(reward):'+'+money(reward)+' · '+mult.toFixed(2)+'×',color);if(critical)toastMsg('⚡ CRITICAL BOUNCE! +'+money(reward));document.getElementById('bounceCombo').textContent=mult.toFixed(2)+'×';document.getElementById('speedStage').textContent=bounceSpeed().toFixed(2)+'×';save();updateUI()}
 let nextGold=performance.now()+30000+Math.random()*25000;
 const logos=[{id:1,x:180,y:130,vx:2.45,vy:1.83,w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999}];
 let saved={};try{saved=JSON.parse(localStorage.getItem('dvd-corner-clicker-save')||'{}')||{}}catch{}
-cash=Math.max(0,Number(saved.cash)||0);hits=Math.max(0,Number(saved.hits)||0);wallHits=Math.max(0,Number(saved.wallHits)||0);
+cash=Math.max(0,Number(saved.cash)||0);hits=Math.max(0,Number(saved.hits)||0);wallHits=Math.max(0,Number(saved.wallHits)||0);bounceStreak=Math.max(0,Number(saved.bounceStreak)||0);
 lifetimeHits=Math.max(hits,Number(saved.lifetimeHits)||hits);prestiges=Math.max(0,Number(saved.prestiges)||0);
 upgrades.forEach(u=>u.level=Math.max(0,Number(saved.levels?.[u.id])||0));
 theme=themes.some(t=>t[0].toLowerCase()===saved.theme&&lifetimeHits>=t[1])?saved.theme:'classic';
 for(let i=0;i<Math.min(19,upgrades[3].level);i++){let n=i+1;logos.push({id:++nextId,x:(95+n*137)%760,y:(55+n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999})}
 const money=n=>'$'+Math.floor(n).toLocaleString(),cost=u=>Math.floor(u.base*Math.pow(1.62,u.level));
-const speed=()=>Math.pow(1.15,upgrades[0].level),payout=()=>10*Math.pow(2,upgrades[1].level)*Math.pow(1.5,prestiges);
+const speed=()=>Math.pow(1.15,upgrades[0].level)*bounceSpeed(),payout=()=>10*Math.pow(2,upgrades[1].level)*Math.pow(1.5,prestiges);
 const today=()=>new Date().toLocaleDateString('en-CA');
 let daily=saved.daily&&saved.daily.date===today()?saved.daily:{date:today(),type:Math.floor(Date.now()/86400000)%3,baseHits:lifetimeHits,baseWalls:wallHits,buys:0,claimed:false};
 const dailySpecs=[{name:'Corner Collector',desc:'Land 5 corner hits today.',goal:5,reward:750},{name:'Wall Runner',desc:'Bounce off 100 walls today.',goal:100,reward:900},{name:'Upgrade Spree',desc:'Buy 2 upgrades today.',goal:2,reward:1100}];
-function save(){localStorage.setItem('dvd-corner-clicker-save',JSON.stringify({cash,hits,wallHits,lifetimeHits,prestiges,theme,levels:Object.fromEntries(upgrades.map(u=>[u.id,u.level])),claimedAch:claimedAch,daily}))}
+function save(){localStorage.setItem('dvd-corner-clicker-save',JSON.stringify({cash,hits,wallHits,lifetimeHits,prestiges,theme,bounceStreak,levels:Object.fromEntries(upgrades.map(u=>[u.id,u.level])),claimedAch:claimedAch,daily}))}
 const claimedAch=new Set(Array.isArray(saved.claimedAch)?saved.claimedAch:achievements.filter(a=>lifetimeHits>=a[1]).map(a=>a[0]));
 function toastMsg(s){toast.textContent=s;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show')}
 function dailyProgress(){let d=dailySpecs[daily.type];return daily.type===0?Math.max(0,lifetimeHits-daily.baseHits):daily.type===1?Math.max(0,wallHits-daily.baseWalls):daily.buys}
@@ -115,11 +123,11 @@ function updateUI(){document.getElementById('cash').textContent=money(cash);docu
 function hit(logo){hits++;lifetimeHits++;let reward=payout();if(logo.id===goldId&&performance.now()<goldUntil){reward*=10;goldId=null;goldUntil=0;toastMsg('✨ GOLDEN CORNER! +'+money(reward))}else toastMsg('CORNER HIT! +'+money(reward));cash+=reward;achievements.filter(a=>lifetimeHits>=a[1]&&!claimedAch.has(a[0])).forEach(a=>{claimedAch.add(a[0]);cash+=a[2];toastMsg('ACHIEVEMENT: '+a[0]+' +'+money(a[2]))});checkDaily();save();updateUI()}
 function colorFor(l,t){if(l.id===goldId&&t<goldUntil)return '#ffd447';if(theme==='rainbow')return 'hsl('+(Math.floor(t/8+l.id*73)%360)+' 100% 62%)';if(theme==='neon')return ['#00f5ff','#ff00d4','#b6ff00','#8b5cff'][colorIndex%4];if(theme==='golden')return '#ffc84a';if(theme==='midnight')return ['#9aa7ff','#b7c8ff','#7379c9'][colorIndex%3];return colors[colorIndex%colors.length]}
 function draw(l,t){let c=colorFor(l,t);ctx.save();ctx.shadowColor=c;ctx.shadowBlur=l.id===goldId&&t<goldUntil?28:15;if(ready){tc.clearRect(0,0,512,307);tc.drawImage(img,0,0,512,307);tc.globalCompositeOperation='source-in';tc.fillStyle=c;tc.fillRect(0,0,512,307);tc.globalCompositeOperation='source-over';ctx.drawImage(tint,l.x,l.y,l.w,l.h)}else{ctx.fillStyle=c;ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='900 67px Arial,sans-serif';ctx.fillText('DVD',l.x+l.w/2,l.y+38);ctx.beginPath();ctx.ellipse(l.x+l.w/2,l.y+38,67,25,-.08,0,Math.PI*2);ctx.lineWidth=3;ctx.strokeStyle=c;ctx.stroke();ctx.font='900 17px Arial,sans-serif';ctx.fillText('VIDEO',l.x+l.w/2,l.y+72)}ctx.restore()}
-function updateBounceCount(){document.getElementById('wallHits').textContent=wallHits.toLocaleString()}
-function prestige(){if(hits<1000||cash<100000)return;if(!confirm('Prestige now? Your cash, run stats and upgrades reset. You keep achievements, appearances and gain a permanent 1.5× payout multiplier.'))return;prestiges++;cash=0;hits=0;wallHits=0;upgrades.forEach(u=>u.level=0);logos.splice(1);logos[0].x=180;logos[0].y=130;logos[0].vx=2.45;logos[0].vy=1.83;logos[0].lastX=-99999;logos[0].lastY=-99999;goldId=null;theme='classic';save();renderShop();updateUI();toastMsg('PRESTIGE '+prestiges+'! PAYOUT BOOSTED')}
+function updateBounceCount(){document.getElementById('wallHits').textContent=wallHits.toLocaleString();document.getElementById('bounceCombo').textContent=comboMultiplier().toFixed(2)+'×';document.getElementById('speedStage').textContent=bounceSpeed().toFixed(2)+'×'}
+function prestige(){if(hits<1000||cash<100000)return;if(!confirm('Prestige now? Your cash, run stats and upgrades reset. You keep achievements, appearances and gain a permanent 1.5× payout multiplier.'))return;prestiges++;cash=0;hits=0;wallHits=0;bounceStreak=0;lastBounceAt=0;upgrades.forEach(u=>u.level=0);logos.splice(1);logos[0].x=180;logos[0].y=130;logos[0].vx=2.45;logos[0].vy=1.83;logos[0].lastX=-99999;logos[0].lastY=-99999;goldId=null;theme='classic';save();renderShop();updateUI();toastMsg('PRESTIGE '+prestiges+'! PAYOUT BOOSTED')}
 document.getElementById('prestigeButton').addEventListener('click',prestige);
-function frame(t){let dt=Math.min((t-last)/16.667||1,2.5);last=t;ctx.clearRect(0,0,W,H);if(t>=nextGold){goldId=logos[Math.floor(Math.random()*logos.length)].id;goldUntil=t+12000;nextGold=t+Math.max(12000,90000/(1+upgrades[4].level*.45))+Math.random()*25000;toastMsg('✨ GOLDEN DVD APPEARED!')}
-logos.forEach(l=>{l.x+=l.vx*speed()*dt;l.y+=l.vy*speed()*dt;let hx=false,hy=false;if(l.x<=0){l.x=0;l.vx=Math.abs(l.vx);hx=true}else if(l.x+l.w>=W){l.x=W-l.w;l.vx=-Math.abs(l.vx);hx=true}if(l.y<=0){l.y=0;l.vy=Math.abs(l.vy);hy=true}else if(l.y+l.h>=H){l.y=H-l.h;l.vy=-Math.abs(l.vy);hy=true}if(hx){l.lastX=t;wallHits++;colorIndex=(colorIndex+1)%colors.length}if(hy){l.lastY=t;wallHits++;colorIndex=(colorIndex+1)%colors.length}if(hx||hy){save();updateBounceCount()}let grace=350+(upgrades[2].level+upgrades[5].level)*100;if(t-l.lastX<=grace&&t-l.lastY<=grace&&t-l.lastCorner>500){l.lastCorner=t;hit(l)}draw(l,t)});checkDaily();requestAnimationFrame(frame)}
+function frame(t){let dt=Math.min((t-last)/16.667||1,2.5);last=t;if(t-lastBounceAt>5000&&bounceStreak){bounceStreak=0;updateBounceCount();save()}ctx.clearRect(0,0,W,H);ctx.save();if(shake>0.2){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.84}else shake=0;if(t>=nextGold){goldId=logos[Math.floor(Math.random()*logos.length)].id;goldUntil=t+12000;nextGold=t+Math.max(12000,90000/(1+upgrades[4].level*.45))+Math.random()*25000;toastMsg('✨ GOLDEN DVD APPEARED!')}
+logos.forEach(l=>{l.x+=l.vx*speed()*dt;l.y+=l.vy*speed()*dt;let hx=false,hy=false;if(l.x<=0){l.x=0;l.vx=Math.abs(l.vx);hx=true}else if(l.x+l.w>=W){l.x=W-l.w;l.vx=-Math.abs(l.vx);hx=true}if(l.y<=0){l.y=0;l.vy=Math.abs(l.vy);hy=true}else if(l.y+l.h>=H){l.y=H-l.h;l.vy=-Math.abs(l.vy);hy=true}if(hx){l.lastX=t;wallHits++;colorIndex=(colorIndex+1)%colors.length;processWallBounce(l,l.x+(l.x===0?0:l.w),l.y+l.h/2)}if(hy){l.lastY=t;wallHits++;colorIndex=(colorIndex+1)%colors.length;processWallBounce(l,l.x+l.w/2,l.y+(l.y===0?0:l.h))}if(hx||hy){updateBounceCount()}let grace=350+(upgrades[2].level+upgrades[5].level)*100;if(t-l.lastX<=grace&&t-l.lastY<=grace&&t-l.lastCorner>500){l.lastCorner=t;hit(l)}draw(l,t)});particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy=p.vy*.97+.035;p.life--;ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=14;ctx.fillRect(p.x,p.y,p.size,p.size)});for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);floaters.forEach(f=>{f.y-=.8;f.life--;ctx.globalAlpha=Math.max(0,f.life/f.max);ctx.fillStyle=f.color;ctx.font='900 20px Arial';ctx.textAlign='center';ctx.shadowColor=f.color;ctx.shadowBlur=12;ctx.fillText(f.text,f.x,f.y)});for(let i=floaters.length-1;i>=0;i--)if(floaters[i].life<=0)floaters.splice(i,1);ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.restore();checkDaily();requestAnimationFrame(frame)}
 renderShop();updateUI();requestAnimationFrame(frame);
 })();</script>
 </body>
