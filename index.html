@@ -80,7 +80,7 @@ footer{text-align:center;color:#65718a;font-size:.72rem;padding:15px}
 'use strict';
 const $=id=>document.getElementById(id),canvas=$('screen'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
 const SAVE_KEY='dvd-corner-clicker-save',now=()=>performance.now(),fmt=n=>{if(!Number.isFinite(n))return '$∞';if(n>=1e12)return '$'+(n/1e12).toFixed(n>=1e15?1:2)+'T';if(n>=1e9)return '$'+(n/1e9).toFixed(2)+'B';if(n>=1e6)return '$'+(n/1e6).toFixed(2)+'M';return '$'+Math.floor(n).toLocaleString();},num=n=>Math.floor(n).toLocaleString();
-const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0,src:'./assets/logos/dvd.svg',text:'DVD'},{id:'philips',name:'Philips',unlock:10,src:'./assets/logos/philips.svg',text:'PHILIPS'},{id:'bluray',name:'Blu-ray Disc',unlock:50,src:'./assets/logos/blu-ray.svg',text:'Blu-ray'},{id:'hddvd',name:'HD DVD',unlock:100,src:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',text:'HD DVD'},{id:'cd',name:'Compact Disc',unlock:250,src:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',text:'COMPACT DISC'},{id:'vhs',name:'VHS',unlock:500,src:'./assets/logos/vhs.svg',text:'VHS'}];
+const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0,src:'./assets/logos/dvd.svg',text:'DVD'},{id:'philips',name:'Philips',unlock:10,src:'https://upload.wikimedia.org/wikipedia/commons/8/8c/Philips_logo.svg',text:'PHILIPS'},{id:'bluray',name:'Blu-ray Disc',unlock:50,src:'./assets/logos/blu-ray.svg',text:'Blu-ray'},{id:'hddvd',name:'HD DVD',unlock:100,src:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',text:'HD DVD'},{id:'cd',name:'Compact Disc',unlock:250,src:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',text:'COMPACT DISC'},{id:'vhs',name:'VHS',unlock:500,src:'./assets/logos/vhs.svg',text:'VHS'}];
 const themeDefs=[['Classic',0,'#000000'],['Neon',25,'#061522'],['Rainbow',100,'#10091f'],['Golden',250,'#171006'],['Midnight',500,'#080b18']];
 const achievementDefs=[['First Contact',1,25],['Corner Rookie',10,100],['Corner Hunter',50,500],['Perfect 100',100,1500],['Corner Machine',500,10000],['DVD Legend',1000,50000]];
 const upgradeDefs=[
@@ -113,7 +113,7 @@ upgradeDefs.forEach(u=>state.levels[u[0]]=Math.max(0,Number(saved.levels?.[u[0]]
 endDefs.forEach(u=>state.endLevels[u[0]]=Math.max(0,Number(saved.endgameLevels?.[u[0]])||0));
 if(!themeDefs.some(t=>t[0].toLowerCase()===state.theme&&state.lifetime>=t[1]))state.theme='classic';
 if(!logoTypes.some(l=>l.id===state.logo&&state.lifetime>=l.unlock))state.logo='dvd';
-const imgs={};logoTypes.forEach(l=>{const im=new Image();im.onload=()=>imgs[l.id]=im;im.onerror=()=>{};im.src=l.src});
+const imgs={};logoTypes.forEach(l=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{imgs[l.id]=im;logoSourceCache.delete(l.id);tintCache.clear()};im.onerror=()=>{delete imgs[l.id]};im.src=l.src});
 const logos=[{x:170,y:115,vx:2.5,vy:1.9,w:148,h:86,wallAt:[],lastCorner:0}];
 let nextGold=now()+26000+Math.random()*18000,goldUntil=0,rareHue=0,lastFrame=0,lastSave=0,lastUI=0,lastEvent=0,event=null,eventUntil=0,toastTimer=0,shake=0;
 const particles=[],floaters=[];
