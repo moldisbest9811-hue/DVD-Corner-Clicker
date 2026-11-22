@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -23,7 +24,7 @@ internal static class Program
 sealed class SaverForm : Form
 {
     readonly Bitmap logo;
-    readonly Timer timer = new() { Interval = 16 };
+    readonly System.Windows.Forms.Timer timer = new() { Interval = 16 };
     readonly Random rng = new();
     float x = 90, y = 90, vx = 4.2f, vy = 3.1f;
     Color tint = Color.White;
