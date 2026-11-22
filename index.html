@@ -164,6 +164,7 @@ function updatePrestige(){let needHits=1000,needCash=100000,can=hits>=needHits&&
 function updateUI(){document.getElementById('cash').textContent=money(cash);document.getElementById('hits').textContent=hits.toLocaleString();document.getElementById('wallHits').textContent=wallHits.toLocaleString();document.getElementById('perHit').textContent=money(payout());document.getElementById('speed').textContent=speed().toFixed(2)+'×';[...document.querySelectorAll('.shop-card button')].forEach((b,i)=>b.disabled=cash<cost(upgrades[i]));renderAchievements();renderThemes();renderCollection();renderDaily();renderEndgame();renderRare();renderSecrets();updatePrestige();renderDimensions();renderFactory();updateAscension();updateInfiniteGoal()}
 function hit(logo){hits++;lifetimeHits++;cornerStreak++;let eventMult=worldEvent?.[0]==='Golden Rain'?5:worldEvent?.[0]==='Double Cash Hour'?2:worldEvent?.[0]==='Corner Apocalypse'?25:1;let reward=payout()*activeDim().payout*eventMult;if(logo.id===goldId&&performance.now()<goldUntil){reward*=10;goldId=null;goldUntil=0;toastMsg('✨ GOLDEN CORNER! +'+money(reward))}else toastMsg('CORNER HIT! +'+money(reward));cash+=reward;totalEarned+=reward;achievements.filter(a=>lifetimeHits>=a[1]&&!claimedAch.has(a[0])).forEach(a=>{claimedAch.add(a[0]);cash+=a[2];toastMsg('ACHIEVEMENT: '+a[0]+' +'+money(a[2]))});checkDaily();checkSecrets();save();updateUI()}
 function colorFor(l,t){if(rareVariant==='gold')return '#ffd447';if(rareVariant==='chrome')return '#c8d4df';if(rareVariant==='holo')return 'hsl('+(Math.floor(t/5)%360)+' 100% 68%)';if(l.id===goldId&&t<goldUntil)return '#ffd447';if(theme==='rainbow')return 'hsl('+(Math.floor(t/8+l.id*73)%360)+' 100% 62%)';if(theme==='neon')return ['#00f5ff','#ff00d4','#b6ff00','#8b5cff'][colorIndex%4];if(theme==='golden')return '#ffc84a';if(theme==='midnight')return ['#9aa7ff','#b7c8ff','#7379c9'][colorIndex%3];return colors[colorIndex%colors.length]}
+const tintedLogoCache={};
 function draw(l,t){
   const image=logoImages[activeLogo];
   ctx.save();
@@ -171,16 +172,28 @@ function draw(l,t){
   ctx.globalCompositeOperation='source-over';
   ctx.filter='none';
   ctx.shadowBlur=0;
-  ctx.fillStyle='#fff';
-  ctx.fillRect(l.x+2,l.y+2,l.w-4,l.h-4);
   if(image&&image.complete&&image.naturalWidth>0){
-    const pad=8;
+    const pad=5;
     const scale=Math.min((l.w-pad*2)/image.naturalWidth,(l.h-pad*2)/image.naturalHeight);
     const dw=image.naturalWidth*scale,dh=image.naturalHeight*scale;
-    ctx.drawImage(image,l.x+(l.w-dw)/2,l.y+(l.h-dh)/2,dw,dh);
+    const color=colorFor(l,t);
+    let cached=tintedLogoCache[activeLogo];
+    if(!cached||cached.color!==color){
+      const stamp=document.createElement('canvas');
+      stamp.width=Math.max(1,Math.round(dw));
+      stamp.height=Math.max(1,Math.round(dh));
+      const stampCtx=stamp.getContext('2d');
+      stampCtx.clearRect(0,0,stamp.width,stamp.height);
+      stampCtx.drawImage(image,0,0,stamp.width,stamp.height);
+      stampCtx.globalCompositeOperation='source-in';
+      stampCtx.fillStyle=color;
+      stampCtx.fillRect(0,0,stamp.width,stamp.height);
+      cached=tintedLogoCache[activeLogo]={color,canvas:stamp};
+    }
+    ctx.drawImage(cached.canvas,l.x+(l.w-dw)/2,l.y+(l.h-dh)/2,dw,dh);
   }else{
     const failed=!!logoImageErrors[activeLogo];
-    ctx.fillStyle='#111';
+    ctx.fillStyle=colorFor(l,t);
     ctx.textAlign='center';
     ctx.textBaseline='middle';
     ctx.font='bold 15px Arial,sans-serif';
