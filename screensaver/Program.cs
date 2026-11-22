@@ -43,7 +43,7 @@ sealed class SaverForm : Form
         using var stream = File.OpenRead(Path.Combine(AppContext.BaseDirectory, "dvd.svg"));
         var svg = new SKSvg();
         svg.Load(stream);
-        using SKBitmap sk = svg.Picture!.ToBitmap(SKColors.White, SKColor.Empty, SKColorType.Rgba8888, SKAlphaType.Premul);
+        using SKBitmap sk = svg.Picture!.ToBitmap(SKColors.Transparent, 1f, 1f, SKColorType.Rgba8888, SKAlphaType.Premul, null);
         using var ms = new MemoryStream();
         using var skImage = SKImage.FromBitmap(sk);
         skImage.Encode(SKEncodedImageFormat.Png, 100).SaveTo(ms);
