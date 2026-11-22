@@ -1,0 +1,36 @@
+name: Build Windows DVD Screensaver
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'screensaver/**'
+      - '.github/workflows/build-screensaver.yml'
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Publish self-contained app
+        run: dotnet publish screensaver/DVD-Corner-Screensaver.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o publish
+      - name: Rename executable to screensaver
+        shell: pwsh
+        run: |
+          Copy-Item publish/DVD-Corner-Screensaver.exe publish/DVD-Corner-Screensaver.scr
+          @'
+          @echo off
+          setlocal
+          set "TARGET=%ProgramFiles%\\DVD Corner Screensaver"
+          if not exist "%TARGET%" mkdir "%TARGET%"
+          copy /Y "%~dp0DVD-Corner-Screensaver.scr" "%TARGET%\\DVD-Corner-Screensaver.scr" >nul
+          rundll32.exe desk.cpl,InstallScreenSaver "%TARGET%\\DVD-Corner-Screensaver.scr"
+          echo Installed. Select DVD Corner Screensaver in Screen Saver Settings.
+          pause
+          '@ | Set-Content publish/INSTALL.bat
+      - uses: actions/upload-artifact@v4
+        with:
+          name: DVD-Corner-Screensaver-Windows-10
+          path: publish/*
+          if-no-files-found: error
