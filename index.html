@@ -16,12 +16,15 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
 .stat span{color:#aaa;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
 .stat strong{font-size:22px;font-variant-numeric:tabular-nums}
 @media(max-width:480px){#tracker{top:10px;left:10px;gap:12px;padding:9px 12px}.stat strong{font-size:18px}}
+#celebration{position:fixed;inset:0;z-index:4;display:grid;place-items:center;pointer-events:none;opacity:0;color:#fff;text-align:center;font:900 clamp(38px,8vw,100px)/1 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.06em;text-shadow:0 0 18px #fff,0 0 42px #20d9e8}
+#celebration.show{animation:perfectHit 950ms ease-out}
+@keyframes perfectHit{0%{opacity:0;transform:scale(.72);background:rgba(255,255,255,0)}12%{opacity:1;transform:scale(1);background:rgba(255,255,255,.2)}100%{opacity:0;transform:scale(1.18);background:rgba(255,255,255,0)}}
 </style>
 </head>
 <body>
 <main id="screen" aria-label="DVD logo bouncing screensaver">
   <div id="dvd" role="img" aria-label="DVD Video logo"></div>
-  <aside id="tracker" aria-label="Animation statistics">
+  <div id="celebration" aria-live="polite"><span>PERFECT HIT!</span></div>\n  <aside id="tracker" aria-label="Animation statistics">
     <div class="stat"><span>Corner Hits</span><strong id="cornerCount">0</strong></div>
     <div class="stat"><span>Wall Bounces</span><strong id="bounceCount">0</strong></div>
   </aside>
@@ -32,7 +35,7 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
   const screen = document.getElementById("screen");
   const dvd = document.getElementById("dvd");
   const cornerCount = document.getElementById("cornerCount");
-  const bounceCount = document.getElementById("bounceCount");
+  const bounceCount = document.getElementById("bounceCount");\n  const celebration = document.getElementById("celebration");
   const colors = ["#20d9e8","#ff3b30","#ffd60a","#34c759","#0a84ff","#bf5af2","#ff2d55","#ff9f0a"];
   let x = 80, y = 70, vx = 2.35, vy = 1.75;
   let last = 0;
@@ -50,6 +53,11 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
     let next = colors[Math.floor(Math.random()*colors.length)];
     while (next === current) next = colors[Math.floor(Math.random()*colors.length)];
     dvd.style.backgroundColor = next;
+  }
+  function celebrateCornerHit() {
+    celebration.classList.remove("show");
+    void celebration.offsetWidth;
+    celebration.classList.add("show");
   }
   function frame(now) {
     if (!last) last = now;
