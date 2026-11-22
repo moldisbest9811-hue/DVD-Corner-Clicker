@@ -114,11 +114,11 @@ endDefs.forEach(u=>state.endLevels[u[0]]=Math.max(0,Number(saved.endgameLevels?.
 if(!themeDefs.some(t=>t[0].toLowerCase()===state.theme&&state.lifetime>=t[1]))state.theme='classic';
 if(!logoTypes.some(l=>l.id===state.logo&&state.lifetime>=l.unlock))state.logo='dvd';
 const imgs={};logoTypes.forEach(l=>{const im=new Image();im.crossOrigin='anonymous';im.onload=()=>{imgs[l.id]=im;logoSourceCache.delete(l.id);tintCache.clear()};im.onerror=()=>{delete imgs[l.id]};im.src=l.src});
-const logos=[{x:170,y:115,vx:2.5,vy:1.9,w:148,h:86,wallAt:[],lastCorner:0}];
+const logos=[{x:170,y:115,vx:2.5,vy:1.9,w:148,h:86,wallAt:[],lastCorner:0,color:'#20d9e8'}];
 let nextGold=now()+26000+Math.random()*18000,goldUntil=0,rareHue=0,lastFrame=0,lastSave=0,lastUI=0,lastEvent=0,event=null,eventUntil=0,toastTimer=0,shake=0;
 const particles=[],floaters=[];
 for(let i=0;i<Math.min(19,state.levels.dvd);i++)addLogo(i+1);
-function addLogo(n){logos.push({x:70+(n*137)%760,y:45+(n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:148,h:86,wallAt:[],lastCorner:0})}
+function addLogo(n){logos.push({x:70+(n*137)%760,y:45+(n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:148,h:86,wallAt:[],lastCorner:0,color:'#20d9e8'})}
 function dimension(){return dimensions.find(d=>d[0]===state.dimension)||dimensions[0]}
 function speed(){return Math.pow(1.15,state.levels.speed||0)*Math.min(3,1+Math.floor(state.walls/25)*.05)*Math.pow(1.1,state.endLevels.overdrive||0)}
 function payout(){return 10*Math.pow(2,state.levels.payout||0)*Math.pow(1.5,state.prestiges)*Math.pow(1.25,state.endLevels.fortune||0)*dimension()[4]*Math.pow(1.25,state.shards)}
@@ -131,9 +131,10 @@ function addCash(n){state.cash+=n;state.totalEarned+=n}
 function burst(x,y,color,critical=false){for(let i=0;i<(critical?38:15);i++){const a=Math.random()*Math.PI*2,v=(critical?3:1.5)+Math.random()*(critical?7:4);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:critical?48:30,max:critical?48:30,size:2+Math.random()*4,color})}shake=Math.max(shake,critical?10:3)}
 function floatText(x,y,text,color){floaters.push({x,y,text,color,life:55,max:55})}
 function colorAt(t){if(state.rareVariant==='gold')return '#ffd45e';if(state.rareVariant==='chrome')return '#e7f2ff';if(state.rareVariant==='holo'||state.theme==='rainbow')return 'hsl('+((t*.06+rareHue)%360)+' 100% 67%)';if(state.theme==='golden')return '#ffd15c';if(state.theme==='neon')return ['#39e8ff','#d55cff','#62ffae'][Math.floor(t/900)%3];if(state.theme==='midnight')return '#8eabff';return ['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'][Math.floor(t/1100)%6]}
+function nextLogoColor(current){if(state.rareVariant==='gold')return '#ffd45e';if(state.rareVariant==='chrome')return '#e7f2ff';if(state.rareVariant==='holo'||state.theme==='rainbow'){let hue=Math.floor(Math.random()*360);let next='hsl('+hue+' 100% 67%)';if(next===current)next='hsl('+((hue+47)%360)+' 100% 67%)';return next}const palette=state.theme==='neon'?['#39e8ff','#d55cff','#62ffae']:state.theme==='golden'?['#ffd15c','#ff9f43','#fff0a6','#d18b25']:state.theme==='midnight'?['#8eabff','#c2d4ff','#7c85ed','#d3a6ff']:['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];const choices=palette.filter(c=>c!==current);return choices[Math.floor(Math.random()*choices.length)]}
 function isGolden(l){return l.goldenUntil>now()}
 function awardCorner(l,x,y){state.hits++;state.lifetime++;state.cornerStreak++;state.combo++;const critical=Math.random()<.055;let reward=Math.max(1,Math.floor(payout()*comboMult()*(critical?10:1)));if(isGolden(l))reward*=10;const rainbowChance=Math.min(.25,.008*Math.pow(2,state.endLevels.luck||0))*(event==='Rainbow Frenzy'?8:1);if(Math.random()<rainbowChance){state.rareEvents++;if(!state.rareOwned.includes('holo'))state.rareOwned.push('holo');reward*=100;toast('🌈 RAINBOW BOUNCE! +'+fmt(reward));for(let i=0;i<5;i++)burst(x,y,'hsl('+(i*72)+' 100% 65%)',true)}addCash(reward);burst(x,y,critical?'#fff16a':colorAt(now()),critical);floatText(x,y,(critical?'CRITICAL! ':'+')+fmt(reward),critical?'#fff16a':colorAt(now()));if(critical)toast('⚡ CRITICAL CORNER!');$('bounceInfo').textContent='Corner hit! +'+fmt(reward);checkAchievements();checkSecrets();checkDaily();save();renderAll()}
-function wallBounce(l,side){state.walls++;state.combo=Math.max(0,state.combo);l.wallAt.push({side,t:now()});l.wallAt=l.wallAt.filter(v=>now()-v.t<windowMs());const hasX=l.wallAt.some(v=>v.side==='left'||v.side==='right'),hasY=l.wallAt.some(v=>v.side==='top'||v.side==='bottom');if(hasX&&hasY&&now()-l.lastCorner>420){l.lastCorner=now();l.wallAt=[];const px=l.x+l.w/2,py=l.y+l.h/2;awardCorner(l,px,py)}else{$('bounceInfo').textContent='Wall bounce · '+num(state.walls)}}
+function wallBounce(l,side){l.color=nextLogoColor(l.color);state.walls++;state.combo=Math.max(0,state.combo);l.wallAt.push({side,t:now()});l.wallAt=l.wallAt.filter(v=>now()-v.t<windowMs());const hasX=l.wallAt.some(v=>v.side==='left'||v.side==='right'),hasY=l.wallAt.some(v=>v.side==='top'||v.side==='bottom');if(hasX&&hasY&&now()-l.lastCorner>420){l.lastCorner=now();l.wallAt=[];const px=l.x+l.w/2,py=l.y+l.h/2;awardCorner(l,px,py)}else{$('bounceInfo').textContent='Wall bounce · '+num(state.walls)}}
 function windowMs(){return 650+(state.levels.grace||0)*90+(state.levels.magnet||0)*120}
 const dailySpecs=[['Corner Collector','Land 5 corner hits today.',5,750],['Wall Runner','Bounce off 100 walls today.',100,900],['Upgrade Spree','Buy 2 upgrades today.',2,1100]];
 function dateKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
@@ -175,7 +176,7 @@ let source=logoSourceCache.get(id);if(!source){source=extractLogo(img);logoSourc
 const c=document.createElement('canvas');c.width=source.width;c.height=source.height;const g=c.getContext('2d');g.drawImage(source,0,0);g.globalCompositeOperation='source-in';g.fillStyle=color;g.fillRect(0,0,c.width,c.height);return c
 }
 function drawLogo(l,t){
-const color=isGolden(l)?'#ffd45e':colorAt(t),im=imgs[state.logo];
+const color=isGolden(l)?'#ffd45e':(l.color||'#20d9e8'),im=imgs[state.logo];
 if(im&&im.complete&&im.naturalWidth){
 const key=state.logo+'|'+color;let tinted=tintCache.get(key);
 if(!tinted){tinted=tintImage(im,color,state.logo);tintCache.set(key,tinted);if(tintCache.size>48)tintCache.clear()}
