@@ -11,23 +11,35 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
 #screen{position:fixed;inset:0;background:#000;overflow:hidden}
 #dvd{position:absolute;width:clamp(150px,22vw,260px);height:auto;aspect-ratio:1058.4/465.84;background:#20d9e8;left:0;top:0;
 -webkit-mask:url("./assets/logos/dvd.svg") center/contain no-repeat;mask:url("./assets/logos/dvd.svg") center/contain no-repeat;will-change:transform,background-color}
+#tracker{position:fixed;top:18px;left:18px;z-index:5;display:flex;gap:18px;padding:12px 16px;border:1px solid #ffffff25;border-radius:12px;background:#111c;color:#fff;font:600 13px/1.3 system-ui,-apple-system,Segoe UI,sans-serif;letter-spacing:.02em;backdrop-filter:blur(8px);pointer-events:none}
+.stat{display:flex;flex-direction:column;gap:4px}
+.stat span{color:#aaa;font-size:10px;text-transform:uppercase;letter-spacing:.1em}
+.stat strong{font-size:22px;font-variant-numeric:tabular-nums}
+@media(max-width:480px){#tracker{top:10px;left:10px;gap:12px;padding:9px 12px}.stat strong{font-size:18px}}
 </style>
 </head>
 <body>
 <main id="screen" aria-label="DVD logo bouncing screensaver">
   <div id="dvd" role="img" aria-label="DVD Video logo"></div>
+  <aside id="tracker" aria-label="Animation statistics">
+    <div class="stat"><span>Corner Hits</span><strong id="cornerCount">0</strong></div>
+    <div class="stat"><span>Wall Bounces</span><strong id="bounceCount">0</strong></div>
+  </aside>
 </main>
 <script>
 (() => {
   "use strict";
   const screen = document.getElementById("screen");
   const dvd = document.getElementById("dvd");
+  const cornerCount = document.getElementById("cornerCount");
+  const bounceCount = document.getElementById("bounceCount");
   const colors = ["#20d9e8","#ff3b30","#ffd60a","#34c759","#0a84ff","#bf5af2","#ff2d55","#ff9f0a"];
   let x = 80, y = 70, vx = 2.35, vy = 1.75;
   let last = 0;
   let lastXHit = -Infinity, lastYHit = -Infinity;
   const cornerWindow = 650;
   let cornerHits = 0;
+  let wallBounces = 0;
 
   function bounds() {
     const r = dvd.getBoundingClientRect();
@@ -52,13 +64,15 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
     if (y <= 0) { y=0; vy=Math.abs(vy); hitY=true; }
     else if (y >= b.maxY) { y=b.maxY; vy=-Math.abs(vy); hitY=true; }
     if (hitX || hitY) changeColor();
-    if (hitX) lastXHit=now;
-    if (hitY) lastYHit=now;
+    if (hitX) { lastXHit=now; wallBounces++; }
+    if (hitY) { lastYHit=now; wallBounces++; }
     if ((hitX && now-lastYHit<=cornerWindow) || (hitY && now-lastXHit<=cornerWindow)) {
       cornerHits++;
+      cornerCount.textContent = cornerHits.toLocaleString();
       document.title = "DVD Hitting Corner Simulator · " + cornerHits + " corner hits";
       lastXHit=lastYHit=-Infinity;
     }
+    if (hitX || hitY) bounceCount.textContent = wallBounces.toLocaleString();
     dvd.style.transform = `translate3d(${x}px,${y}px,0)`;
     requestAnimationFrame(frame);
   }
