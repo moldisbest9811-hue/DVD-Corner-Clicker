@@ -1,219 +1,180 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050505">
-  <title>DVD Corner Clicker</title>
-  <style>
-    :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background:#080808; color:#f5f5f5; }
-    * { box-sizing:border-box }
-    body { margin:0; min-height:100vh; background:radial-gradient(ellipse at top,#171717 0,#080808 55%); }
-    .wrap { width:min(1100px, calc(100% - 32px)); margin:0 auto; padding:32px 0 56px; }
-    header { display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:22px; }
-    h1 { font-size:clamp(1.5rem,4vw,2.35rem); margin:0; letter-spacing:-.06em; }
-    .sub { color:#929292; margin:5px 0 0; font-size:.9rem; }
-    .pill { border:1px solid #333; border-radius:999px; padding:8px 12px; color:#aaa; font-size:.78rem; white-space:nowrap; }
-    .screen { position:relative; border:1px solid #303030; border-radius:18px; overflow:hidden; background:#000; box-shadow:0 22px 80px #000b, inset 0 0 0 1px #ffffff08; }
-    canvas { display:block; width:100%; height:auto; aspect-ratio:16/9; }
-    .screen-label { position:absolute; left:16px; top:14px; color:#666; font-size:.7rem; letter-spacing:.14em; text-transform:uppercase; pointer-events:none; }
-    .stats { display:grid; grid-template-columns:repeat(5,1fr); gap:12px; margin:16px 0 26px; }
-    .stat,.shop-card { border:1px solid #292929; background:linear-gradient(145deg,#171717,#101010); border-radius:14px; padding:15px; }
-    .stat span { display:block; color:#858585; font-size:.75rem; margin-bottom:7px; }
-    .stat strong { font-size:clamp(1.1rem,3vw,1.6rem); letter-spacing:-.04em; font-variant-numeric:tabular-nums; }
-    .section-head { display:flex; justify-content:space-between; align-items:end; gap:12px; margin:0 0 12px; }
-    h2 { margin:0; font-size:1.2rem; letter-spacing:-.03em; }
-    .hint { color:#777; font-size:.8rem; }
-    .shop { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-    .shop-card { display:flex; flex-direction:column; min-height:172px; }
-    .shop-card h3 { margin:0 0 6px; font-size:1rem; }
-    .shop-card p { color:#929292; font-size:.82rem; line-height:1.45; margin:0 0 14px; flex:1; }
-    button { border:1px solid #444; border-radius:9px; background:#f0f0f0; color:#111; font-weight:750; padding:10px 12px; cursor:pointer; transition:transform .12s, opacity .12s; }
-    button:hover:not(:disabled) { transform:translateY(-1px); }
-    button:disabled { cursor:not-allowed; opacity:.35; }
-    .buy-row { display:flex; justify-content:space-between; align-items:center; gap:8px; color:#cfcfcf; font-size:.78rem; }
-    .buy-row button { min-width:94px; }
-    .extras{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:24px}.panel{border:1px solid #292929;background:linear-gradient(145deg,#171717,#101010);border-radius:14px;padding:16px}.panel h2{margin-bottom:12px}.achievement-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.achievement{padding:10px;border:1px solid #303030;border-radius:10px;color:#777;font-size:.8rem}.achievement.unlocked{color:#ffe18a;border-color:#80652c;background:#241d0b}.achievement strong{display:block;margin-bottom:3px}.theme-buttons{display:flex;flex-wrap:wrap;gap:8px}.theme-buttons button{background:#222;color:#ddd;border-color:#444}.theme-buttons button.active{border-color:#fff;box-shadow:0 0 12px #fff5}@media(max-width:650px){.extras{grid-template-columns:1fr}}
-    .daily-challenge p{color:#aaa;font-size:.84rem;margin:8px 0}.progress-track{height:8px;background:#292929;border-radius:99px;overflow:hidden}.progress-fill{height:100%;background:#e7c45b;border-radius:99px}.daily-foot{font-size:.75rem;color:#999;margin-top:8px}.prestige-panel{margin-top:12px}.prestige-panel p{margin:9px 0 13px}.prestige-panel button{background:#e9c45b;border-color:#e9c45b}.logo-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.logo-buttons button{background:#222;color:#ddd;border-color:#444}.logo-buttons button.active{border-color:#7ddcff;box-shadow:0 0 12px #37cfff55}.logo-buttons button:disabled{opacity:.4}.rare-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.rare-buttons button,.endgame-card button{background:#222;color:#eee;border-color:#555}.rare-buttons button.active{border-color:#e9c45b;box-shadow:0 0 12px #e9c45b66}.secret-list{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}.secret-item{padding:10px;border:1px solid #333;border-radius:9px;color:#888;font-size:.78rem}.secret-item.unlocked{color:#ffe18a;border-color:#80652c;background:#241d0b}.endgame-card{border:1px solid #40351b;background:linear-gradient(145deg,#211b0d,#111);border-radius:12px;padding:12px}.footer { color:#686868; font-size:.75rem; text-align:center; margin-top:24px; }
-    .dimension-buttons{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.dimension-buttons button{background:#222;color:#eee;border-color:#555}.dimension-buttons button.active{border-color:#7ddcff}.event-banner{padding:12px;border:1px solid #55451c;background:#211b0d;border-radius:10px;margin-top:10px;color:#ffe18a}.factory-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:10px}
-    .toast { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); color:#fff; font-weight:850; font-size:clamp(1rem,3vw,1.7rem); text-shadow:0 2px 20px #fff8; opacity:0; pointer-events:none; }
-    .toast.show { animation:pop .9s ease-out; }
-    @keyframes pop { 0%{opacity:0;transform:translate(-50%,-30%) scale(.8)} 20%{opacity:1;transform:translate(-50%,-50%) scale(1.08)} 100%{opacity:0;transform:translate(-50%,-80%) scale(1)} }
-    @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}.shop{grid-template-columns:1fr 1fr}}
-    @media(max-width:480px){.shop{grid-template-columns:1fr}.wrap{width:calc(100% - 22px);padding-top:20px}.pill{display:none}}
-  </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#070910">
+<title>DVD Corner Clicker</title>
+<style>
+:root{color-scheme:dark;--bg:#080a12;--panel:#111522;--panel2:#171d2d;--line:#283149;--muted:#8d98b2;--text:#f3f6ff;--accent:#38d9ed;--accent2:#8d6bff;--good:#65e6a4;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% -20%,#1c3150 0,transparent 48%),var(--bg);color:var(--text);min-height:100vh}
+button{font:inherit;color:inherit;border:1px solid var(--line);background:#20283b;border-radius:10px;padding:9px 13px;cursor:pointer;transition:.16s ease}
+button:hover:not(:disabled){border-color:var(--accent);transform:translateY(-1px);background:#293650}
+button:disabled{opacity:.38;cursor:not-allowed}
+button.primary{background:linear-gradient(110deg,#087e9b,#5640a8);border:0;font-weight:800}
+button.active{border-color:var(--accent);background:#123b4b;box-shadow:0 0 0 1px #38d9ed33 inset}
+.wrap{width:min(1220px,calc(100% - 28px));margin:auto;padding:28px 0 60px}
+header{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-bottom:20px}
+.brand{display:flex;align-items:center;gap:13px}.brand-mark{width:45px;height:45px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(140deg,#1ac5dd,#7153df);font-size:23px;box-shadow:0 8px 30px #2479b866}
+h1{font-size:clamp(1.45rem,4vw,2rem);letter-spacing:-.055em;margin:0}.subtitle{color:var(--muted);font-size:.85rem;margin-top:4px}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end}.save-state{font-size:.75rem;color:var(--good);padding:8px 11px;border:1px solid #254b40;border-radius:99px}
+.hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(250px,.8fr);gap:16px}
+.screen-card,.side-card,.panel{background:linear-gradient(145deg,#151b2a,#0f1420);border:1px solid var(--line);border-radius:18px;box-shadow:0 16px 50px #0005}
+.screen-card{padding:12px}.screen-top{display:flex;justify-content:space-between;align-items:center;padding:2px 4px 11px;color:var(--muted);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase}
+.live{color:var(--good);letter-spacing:.04em}.canvas-wrap{position:relative;border-radius:12px;overflow:hidden;background:#000;border:1px solid #273149}
+canvas{display:block;width:100%;aspect-ratio:16/9;height:auto}.screen-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:11px 4px 1px;color:var(--muted);font-size:.78rem}
+.side-card{padding:17px;display:flex;flex-direction:column;gap:13px}.money-label{font-size:.76rem;color:var(--muted);text-transform:uppercase;letter-spacing:.12em}.money{font-size:clamp(2rem,5vw,3.2rem);font-weight:900;letter-spacing:-.07em;line-height:1.1;overflow-wrap:anywhere}.rate{color:var(--good);font-size:.82rem}.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.mini-stat{background:#0c111c;border:1px solid #222d42;border-radius:12px;padding:11px}.mini-stat span{display:block;color:var(--muted);font-size:.72rem;margin-bottom:5px}.mini-stat strong{font-size:1.08rem}.side-actions{display:flex;gap:8px}.side-actions button{flex:1}
+.nav{display:flex;gap:7px;overflow-x:auto;padding:16px 0 12px;scrollbar-width:thin}.nav button{white-space:nowrap;font-size:.82rem}.tab{display:none}.tab.active{display:block}
+.panel{padding:18px;margin:0 0 15px}.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:14px}.panel h2{font-size:1.1rem;margin:0;letter-spacing:-.025em}.panel-desc{font-size:.8rem;color:var(--muted);margin:5px 0 0;line-height:1.5}.eyebrow{font-size:.68rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;font-weight:800;margin-bottom:6px}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.shop-card,.item-card{background:linear-gradient(145deg,#1a2234,#121827);border:1px solid #29354d;border-radius:13px;padding:14px;min-width:0}.shop-card h3,.item-card h3{font-size:.93rem;margin:0 0 7px}.shop-card p,.item-card p{color:var(--muted);font-size:.78rem;line-height:1.45;min-height:34px;margin:0 0 12px}.buy-row{display:flex;align-items:center;justify-content:space-between;gap:8px;font-weight:800;font-size:.88rem}.buy-row button{font-size:.78rem;padding:8px 12px}
+.progress{height:8px;background:#080d17;border-radius:99px;overflow:hidden;border:1px solid #263149}.progress>i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:99px;transition:width .25s}
+.progress-line{display:flex;justify-content:space-between;color:var(--muted);font-size:.75rem;margin:8px 0}
+.pills{display:flex;flex-wrap:wrap;gap:8px}.pill{font-size:.8rem}.list-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.list-item{padding:11px;border:1px solid #283249;background:#0d1320;border-radius:11px;display:flex;justify-content:space-between;gap:10px;align-items:center;font-size:.8rem}.list-item small{display:block;color:var(--muted);margin-top:4px}.list-item.done{border-color:#2c765a;background:#10251f}.muted{color:var(--muted)}.notice{padding:13px;border:1px solid #34405c;background:#101a2a;border-radius:12px;font-size:.82rem;color:#c6d1e8;line-height:1.55}
+.toast{position:fixed;top:22px;left:50%;transform:translate(-50%,-20px);opacity:0;pointer-events:none;background:#eafaff;color:#07121b;border-radius:99px;padding:11px 18px;font-weight:900;font-size:.85rem;z-index:5;box-shadow:0 8px 35px #0009}.toast.show{animation:toast 2s ease both}@keyframes toast{0%{opacity:0;transform:translate(-50%,-20px)}15%,75%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-12px)}}
+footer{text-align:center;color:#65718a;font-size:.72rem;padding:15px}
+@media(max-width:850px){.hero{grid-template-columns:1fr}.side-card{display:grid;grid-template-columns:1fr 1fr;align-items:center}.side-card .stat-grid{grid-column:1/-1}.side-actions{grid-column:1/-1}}
+@media(max-width:620px){.wrap{width:calc(100% - 18px);padding-top:16px}.cards{grid-template-columns:1fr 1fr}.list-grid{grid-template-columns:1fr}.panel{padding:14px}.side-card{display:flex}.header-right .save-state{display:none}}
+@media(max-width:420px){.cards{grid-template-columns:1fr}.screen-bottom{font-size:.68rem}.brand-mark{width:39px;height:39px}}
+</style>
 </head>
 <body>
-  <main class="wrap">
-    <header>
-      <div><h1>DVD Corner Clicker</h1><p class="sub">The corner is waiting. Let it bounce.</p></div>
-      <div class="pill">IDLE / INCREMENTAL · v0.1</div>
-    </header>
-    <section class="screen" aria-label="DVD screensaver">
-      <div class="screen-label">DVD VIDEO</div>
-      <canvas id="screen" width="960" height="540"></canvas>
-      <div id="toast" class="toast">CORNER HIT! +$10</div>
-    </section>
-    <section class="stats" aria-live="polite">
-      <div class="stat"><span> CASH </span><strong id="cash">$0</strong></div>
-      <div class="stat"><span>CORNER HITS</span><strong id="hits">0</strong></div>
-      <div class="stat"><span>PER HIT</span><strong id="perHit">$10</strong></div>
-      <div class="stat"><span>DVD SPEED</span><strong id="speed">1.0×</strong></div>
-      <div class="stat"><span>WALL BOUNCES</span><strong id="wallHits">0</strong></div>
-      <div class="stat"><span>BOUNCE COMBO</span><strong id="bounceCombo">1.0×</strong></div>
-      <div class="stat"><span>SPEED STAGE</span><strong id="speedStage">1</strong></div>
-    </section>
-    <div class="section-head"><div><h2>Upgrade shop</h2><div class="hint">Spend your corner cash to improve the bounce.</div></div></div>
-    <section class="shop" id="shop"></section>
-    <section class="extras"><div class="panel"><h2>Achievements</h2><div class="hint" id="achievementProgress">0 / 6 unlocked</div><div class="achievement-list" id="achievements"></div></div><div class="panel"><h2>DVD appearances</h2><p class="hint">Unlock special looks by reaching corner-hit milestones.</p><div class="theme-buttons" id="themes"></div><p class="hint" id="themeStatus"></p></div></section>
-    <section class="extras">
-      <div class="panel"><h2>Daily challenge</h2><div id="dailyChallenge" class="daily-challenge"></div></div>
-      <div class="panel"><h2>Logo collection</h2><div class="hint" id="collectionProgress"></div><p class="hint">Unlock different classic disc and player logos with lifetime corner hits. Select one to put it on the screen.</p><div class="logo-buttons" id="logoCollection"></div></div>
-    </section>
-    <section class="extras"><div class="panel"><h2>Rare logo variants</h2><p class="hint">Find rare appearances while bouncing. Equip any variant you've discovered.</p><div class="rare-buttons" id="rareVariants"></div><div class="hint" id="rareStatus"></div></div><div class="panel"><h2>Secret achievements</h2><div class="hint" id="secretProgress">0 / 4 discovered</div><div class="secret-list" id="secretAchievements"></div></div></section>
-    <section class="panel"><h2>Multiverse dimensions</h2><p class="hint">Unlock new realities with different physics and payout bonuses.</p><div id="dimensions" class="dimension-buttons"></div><div class="hint" id="dimensionStatus"></div></section>
-    <section class="extras"><div class="panel"><h2>DVD reactor & factories</h2><div class="hint" id="reactorRate">$0/sec</div><div id="factoryShop" class="factory-grid"></div></div><div class="panel"><h2>World events</h2><div id="eventStatus" class="event-banner">Waiting for the next world event...</div></div></section>
-    <section class="panel" style="margin-top:12px"><h2>Endgame laboratory</h2><p class="hint">Ridiculously expensive upgrades for ridiculously rich players.</p><section class="shop" id="endgameShop"></section></section>
-    <section class="panel" style="margin-top:12px"><h2>Cosmic ascension</h2><div class="hint" id="shardCount">0 Cosmic Shards</div><p class="hint" id="ascensionHint">Reach $1 quintillion to ascend.</p><button id="ascendButton" disabled>Ascend for Cosmic Shards</button></section>
-    <section class="panel" style="margin-top:12px"><h2>THE INFINITE CORNER</h2><div class="hint" id="infiniteProgress"></div><p class="hint">Master every dimension, collect 100 Cosmic Shards, and earn $1 nonillion lifetime cash.</p></section>
-    <section class="panel prestige-panel"><h2>Prestige</h2><div class="hint" id="prestigeLevel"></div><p class="hint" id="prestigeHint"></p><button id="prestigeButton" disabled>Prestige for 1.5× payout</button></section>
-    <p class="footer">Progress saves automatically in this browser. Corner hits require the logo to reach both adjoining screen edges on the same bounce.</p>
-  </main>
-<script>(()=>{
-const canvas=document.getElementById('screen'),ctx=canvas.getContext('2d'),toast=document.getElementById('toast'),W=canvas.width,H=canvas.height;
-const img={};let ready=true;
-
-const colors=['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'];
-const achievements=[['First Contact',1,25],['Corner Rookie',10,100],['Corner Hunter',50,500],['Perfect 100',100,1500],['Corner Machine',500,10000],['DVD Legend',1000,50000]];
-const themes=[['Classic',0],['Neon',25],['Rainbow',100],['Golden',250],['Midnight',500]];
-const upgrades=[
-{id:'speed',name:'Turbo Bounce',desc:'Increase every DVD movement speed.',base:35,level:0},
-{id:'payout',name:'Corner Bonus',desc:'Double cash earned per corner hit.',base:50,level:0},
-{id:'grace',name:'Lucky Timing',desc:'A slightly wider window for connecting two edge bounces.',base:90,level:0},
-{id:'dvd',name:'Extra DVD',desc:'Add another bouncing DVD logo.',base:250,level:0},
-{id:'gold',name:'Golden Frequency',desc:'Golden DVDs appear more often.',base:400,level:0},
-{id:'magnet',name:'Corner Sense',desc:'Increase the corner connection window.',base:650,level:0}
+<div class="wrap">
+<header><div class="brand"><div class="brand-mark">◉</div><div><h1>DVD Corner Clicker</h1><div class="subtitle">One perfect corner bounce changes everything.</div></div></div><div class="header-right"><span class="save-state" id="saveState">● AUTO-SAVED</span><button id="soundBtn">Sound: Off</button></div></header>
+<section class="hero">
+<div class="screen-card"><div class="screen-top"><span id="logoLabel">DVD VIDEO · CLASSIC EARTH</span><span class="live">● LIVE SIMULATION</span></div><div class="canvas-wrap"><canvas id="screen" width="960" height="540"></canvas></div><div class="screen-bottom"><span id="bounceInfo">Waiting for the perfect bounce...</span><span id="worldInfo">CLASSIC EARTH</span></div></div>
+<aside class="side-card"><div><div class="money-label">Available cash</div><div class="money" id="cash">$0</div><div class="rate" id="rate">+$0 per corner hit</div></div><div class="stat-grid"><div class="mini-stat"><span>Lifetime corners</span><strong id="hits">0</strong></div><div class="mini-stat"><span>Wall bounces</span><strong id="walls">0</strong></div><div class="mini-stat"><span>Current combo</span><strong id="combo">1.00×</strong></div><div class="mini-stat"><span>DVD speed</span><strong id="speed">1.00×</strong></div></div><div class="side-actions"><button id="pauseBtn">Pause</button><button id="saveBtn">Save now</button></div></aside>
+</section>
+<nav class="nav" aria-label="Game sections"><button class="active" data-tab="upgrades">Upgrades</button><button data-tab="collection">Collection</button><button data-tab="achievements">Achievements</button><button data-tab="multiverse">Multiverse</button><button data-tab="prestige">Prestige</button></nav>
+<main>
+<section class="tab active" id="tab-upgrades">
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Improve your bounce</div><h2>Upgrade shop</h2><p class="panel-desc">Make every wall hit faster, every corner more valuable, and every run more chaotic.</p></div><span class="muted" id="upgradeCount">0 upgrades</span></div><div class="cards" id="shop"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Today's mission</div><h2 id="dailyName">Daily challenge</h2><p class="panel-desc" id="dailyDesc">Complete a challenge for a cash bonus.</p></div><span id="dailyReward" class="muted"></span></div><div class="progress"><i id="dailyBar"></i></div><div class="progress-line"><span id="dailyProgress">0 / 0</span><span id="dailyState">In progress</span></div></div>
+</section>
+<section class="tab" id="tab-collection">
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Choose your icon</div><h2>Logo collection</h2><p class="panel-desc">Unlock classic disc and tape logos by reaching lifetime corner milestones.</p></div><span class="muted" id="collectionProgress"></span></div><div class="pills" id="logoCollection"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Cosmetic laboratory</div><h2>Rare appearances</h2><p class="panel-desc">Discover rare logo finishes and equip the look you like.</p></div><span class="muted" id="rareStatus"></span></div><div class="pills" id="rareVariants"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Change the atmosphere</div><h2>Screen themes</h2><p class="panel-desc">Themes unlock as your lifetime corner count grows.</p></div><span class="muted" id="themeStatus"></span></div><div class="pills" id="themes"></div></div>
+</section>
+<section class="tab" id="tab-achievements">
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Milestones</div><h2>Achievements</h2><p class="panel-desc">Permanent rewards for building your corner-hit legacy.</p></div><span class="muted" id="achievementProgress"></span></div><div class="list-grid" id="achievements"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Hidden objectives</div><h2>Secret achievements</h2><p class="panel-desc">Some feats are deliberately not revealed until you discover them.</p></div><span class="muted" id="secretProgress"></span></div><div class="list-grid" id="secretAchievements"></div></div>
+</section>
+<section class="tab" id="tab-multiverse">
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Beyond the screen</div><h2>Multiverse dimensions</h2><p class="panel-desc">Each dimension changes the simulation and multiplies your corner rewards.</p></div><span class="muted" id="dimensionStatus"></span></div><div class="cards" id="dimensions"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Passive production</div><h2>DVD reactor & factories</h2><p class="panel-desc">Build automated production to earn cash while the logos keep bouncing.</p></div><span class="muted" id="reactorRate"></span></div><div class="buy-row"><div><strong id="factoryLevel">Factory level 0</strong><div class="muted" id="factoryDesc">No automated production yet.</div></div><button id="factoryBuy">Build factory · $2,500</button></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Reality fluctuations</div><h2>World events</h2><p class="panel-desc" id="eventDesc">Anomaly scanner is waiting for its next event.</p></div><span id="eventStatus" class="muted">Scanning</span></div><button id="eventButton">Trigger anomaly scan</button></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Late-game systems</div><h2>Endgame laboratory</h2><p class="panel-desc">Research reality-bending upgrades with astronomical costs.</p></div></div><div class="cards" id="endgameShop"></div></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Reset the cosmos</div><h2>Cosmic ascension</h2><p class="panel-desc">Ascend after reaching the final dimension threshold to gain permanent cosmic shards.</p></div><span id="shardCount" class="muted">0 shards</span></div><div class="progress"><i id="ascensionBar"></i></div><div class="progress-line"><span id="ascensionHint">Reach $1e20 lifetime cash to ascend.</span><span id="ascensionReward">+0 shards</span></div><button class="primary" id="ascendButton">Ascend</button></div>
+<div class="panel"><div class="panel-head"><div><div class="eyebrow">Beyond infinity</div><h2>The Infinite Corner</h2><p class="panel-desc" id="infiniteDesc">The ultimate corner-bounce challenge.</p></div></div><div class="progress"><i id="infiniteBar"></i></div><div class="progress-line"><span id="infiniteProgress">0 / 1e30 lifetime cash</span><span id="infiniteState">Not reached</span></div></div>
+</section>
+<section class="tab" id="tab-prestige">
+<div class="panel"><div class="eyebrow">Start again, stronger</div><h2>Prestige</h2><p class="panel-desc">Reset your current run's cash, upgrades, and corner count. Keep lifetime milestones, collection unlocks, themes, and gain a permanent 1.5× payout multiplier per prestige.</p><div class="stat-grid" style="margin:16px 0"><div class="mini-stat"><span>Prestige level</span><strong id="prestigeLevel">0</strong></div><div class="mini-stat"><span>Permanent multiplier</span><strong id="prestigeMult">1.00×</strong></div></div><div class="progress"><i id="prestigeBar"></i></div><div class="progress-line"><span id="prestigeHint">Need 1,000 run corners and $100,000 cash.</span><span id="prestigeState">Locked</span></div><button class="primary" id="prestigeButton">Prestige reset</button></div>
+<div class="panel"><div class="eyebrow">Your run history</div><h2>Lifetime statistics</h2><div class="stat-grid" style="margin-top:14px"><div class="mini-stat"><span>Total cash earned</span><strong id="totalEarned">$0</strong></div><div class="mini-stat"><span>Total ascensions</span><strong id="ascensions">0</strong></div><div class="mini-stat"><span>Rare events</span><strong id="rareEvents">0</strong></div><div class="mini-stat"><span>Cosmic shards</span><strong id="shardsStat">0</strong></div></div></div>
+</section>
+</main>
+<footer>DVD Corner Clicker · Your save stays in this browser.</footer>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id),canvas=$('screen'),ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+const SAVE_KEY='dvd-corner-clicker-save',now=()=>performance.now(),fmt=n=>{if(!Number.isFinite(n))return '$∞';if(n>=1e12)return '$'+(n/1e12).toFixed(n>=1e15?1:2)+'T';if(n>=1e9)return '$'+(n/1e9).toFixed(2)+'B';if(n>=1e6)return '$'+(n/1e6).toFixed(2)+'M';return '$'+Math.floor(n).toLocaleString();},num=n=>Math.floor(n).toLocaleString();
+const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0,src:'./assets/logos/dvd.svg',text:'DVD'},{id:'philips',name:'Philips',unlock:10,src:'./assets/logos/philips.svg',text:'PHILIPS'},{id:'bluray',name:'Blu-ray Disc',unlock:50,src:'./assets/logos/blu-ray.svg',text:'Blu-ray'},{id:'hddvd',name:'HD DVD',unlock:100,src:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',text:'HD DVD'},{id:'cd',name:'Compact Disc',unlock:250,src:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',text:'COMPACT DISC'},{id:'vhs',name:'VHS',unlock:500,src:'./assets/logos/vhs.svg',text:'VHS'}];
+const themeDefs=[['Classic',0,'#000000'],['Neon',25,'#061522'],['Rainbow',100,'#10091f'],['Golden',250,'#171006'],['Midnight',500,'#080b18']];
+const achievementDefs=[['First Contact',1,25],['Corner Rookie',10,100],['Corner Hunter',50,500],['Perfect 100',100,1500],['Corner Machine',500,10000],['DVD Legend',1000,50000]];
+const upgradeDefs=[
+['speed','Turbo Bounce','Increase movement speed for every DVD.',35],
+['payout','Corner Bonus','Double the cash earned from corner hits.',50],
+['grace','Lucky Timing','Extend the time window between nearby wall bounces.',90],
+['dvd','Extra DVD','Add another bouncing logo to the screen.',250],
+['gold','Golden Frequency','Make golden logo appearances more frequent.',400],
+['magnet','Corner Sense','Make corner connections easier to achieve.',650]
 ];
-const endgameUpgrades=[
-{id:'fortune',name:'Fortune Reactor',desc:'Increase corner payout by 25% per level.',base:1e12,level:0},
-{id:'overdrive',name:'Overdrive Core',desc:'Increase movement speed by 10% per level.',base:5e12,level:0},
-{id:'combo',name:'Combo Singularity',desc:'Increase maximum bounce combo by 0.5× per level.',base:2.5e13,level:0},
-{id:'luck',name:'Reality Bender',desc:'Make rare rainbow events twice as likely per level.',base:1e14,level:0}
+const endDefs=[
+['fortune','Fortune Reactor','Increase corner rewards by 25% per level.',1e12],
+['overdrive','Overdrive Core','Increase movement speed by 10% per level.',5e12],
+['combo','Combo Singularity','Raise the maximum combo multiplier.',2.5e13],
+['luck','Reality Bender','Increase the chance of rare rainbow events.',1e14]
 ];
-const secretDefs=[['Tenfold', 'Land 10 corner hits in a row.',()=>cornerStreak>=10],['Wallflower','Reach 1,000 wall bounces.',()=>wallHits>=1000],['Speed Demon','Reach 100× DVD speed.',()=>speed()>=100],['Rainbow Hunter','Trigger a rare rainbow bounce.',()=>rareEvents>0]];
-let cornerStreak=0,rareEvents=0,rareVariant='normal',rareOwned=['normal'];
-const dimensions=[{id:'classic',name:'Classic Earth',unlock:0,bg:'#000',speed:1,payout:1},{id:'neon',name:'Neon Grid',unlock:1e6,bg:'#071321',speed:1.15,payout:1.5},{id:'cosmic',name:'Cosmic Expanse',unlock:1e12,bg:'#10051e',speed:1.35,payout:3},{id:'void',name:'The Void',unlock:1e20,bg:'#080b0d',speed:1.65,payout:7}];
-let activeDimension='classic',cosmicShards=0,totalEarned=0,factoryLevel=0,ascensions=0,worldEvent=null,eventUntil=0,nextEventAt=0,lastFactoryTick=0,lastPassiveUI=0;
-let cash=0,hits=0,wallHits=0,lifetimeHits=0,prestiges=0,colorIndex=0,theme='classic',activeLogo='dvd',nextId=1,goldId=null,goldUntil=0,last=0,dailyBuys=0,bounceStreak=0,lastBounceAt=0,shake=0;
-const particles=[],floaters=[];
-const comboMultiplier=()=>Math.min(5,1+Math.floor(bounceStreak/10)*0.25);
-const bounceSpeed=()=>Math.min(3,1+Math.floor(wallHits/25)*0.05);
-function burst(x,y,color,critical=false){const count=critical?48:18;for(let i=0;i<count;i++){let a=Math.random()*Math.PI*2,s=(critical?3:1.5)+Math.random()*(critical?8:4);particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:critical?55:34,max:critical?55:34,size:critical?2+Math.random()*5:2+Math.random()*3,color})}shake=Math.max(shake,critical?13:4)}
-function floatText(x,y,text,color){floaters.push({x,y,text,color,life:55,max:55})}
-function processWallBounce(l,x,y){bounceStreak++;lastBounceAt=performance.now();let mult=Math.min(5+endgameUpgrades[2].level*.5,comboMultiplier()),critical=Math.random()<0.055;let reward=Math.max(1,Math.floor(mult*(critical?10:1)));cash+=reward;totalEarned+=reward;let rainbowChance=Math.min(.25,.008*Math.pow(2,endgameUpgrades[3].level))*(worldEvent?.[0]==='Rainbow Frenzy'?10:1);if(Math.random()<rainbowChance){rareEvents++;cornerStreak=0;if(!rareOwned.includes('holo'))rareOwned.push('holo');rareVariant='holo';reward=Math.floor(reward*100);cash+=reward;totalEarned+=reward;toastMsg('🌈 RAINBOW BOUNCE! +'+money(reward));for(let i=0;i<6;i++)burst(x,y,'hsl('+(i*60)+' 100% 65%)',true);checkSecrets()}let color=critical?'#fff16a':colorFor(l,last);burst(x,y,color,critical);floatText(x,y,critical?'CRITICAL! +'+money(reward):'+'+money(reward)+' · '+mult.toFixed(2)+'×',color);if(critical)toastMsg('⚡ CRITICAL BOUNCE! +'+money(reward));document.getElementById('bounceCombo').textContent=mult.toFixed(2)+'×';document.getElementById('speedStage').textContent=bounceSpeed().toFixed(2)+'×';save();updateUI()}
-let nextGold=performance.now()+30000+Math.random()*25000;
-const logos=[{id:1,x:180,y:130,vx:2.45,vy:1.83,w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999}];
-let saved={};try{saved=JSON.parse(localStorage.getItem('dvd-corner-clicker-save')||'{}')||{}}catch{}
-cash=Math.max(0,Number(saved.cash)||0);hits=Math.max(0,Number(saved.hits)||0);wallHits=Math.max(0,Number(saved.wallHits)||0);bounceStreak=Math.max(0,Number(saved.bounceStreak)||0);
-lifetimeHits=Math.max(hits,Number(saved.lifetimeHits)||hits);prestiges=Math.max(0,Number(saved.prestiges)||0);
-activeDimension=dimensions.some(d=>d.id===saved.activeDimension)?saved.activeDimension:'classic';cosmicShards=Math.max(0,Number(saved.cosmicShards)||0);totalEarned=Math.max(cash,Number(saved.totalEarned)||cash);factoryLevel=Math.max(0,Number(saved.factoryLevel)||0);ascensions=Math.max(0,Number(saved.ascensions)||0);
-upgrades.forEach(u=>u.level=Math.max(0,Number(saved.levels?.[u.id])||0));
-endgameUpgrades.forEach(u=>u.level=Math.max(0,Number(saved.endgameLevels?.[u.id])||0));
-cornerStreak=Math.max(0,Number(saved.cornerStreak)||0);rareEvents=Math.max(0,Number(saved.rareEvents)||0);rareOwned=Array.isArray(saved.rareOwned)?[...new Set(['normal',...saved.rareOwned])]:['normal'];rareVariant=rareOwned.includes(saved.rareVariant)?saved.rareVariant:'normal';
-theme=themes.some(t=>t[0].toLowerCase()===saved.theme&&lifetimeHits>=t[1])?saved.theme:'classic';
-const logoTypes=[{id:'dvd',name:'DVD Video',unlock:0},{id:'philips',name:'Philips',unlock:10},{id:'bluray',name:'Blu-ray Disc',unlock:50},{id:'hddvd',name:'HD DVD',unlock:100},{id:'cd',name:'Compact Disc',unlock:250},{id:'vhs',name:'VHS',unlock:500}];
-const logoAssets={
-dvd:'./assets/logos/dvd.svg',
-philips:'./assets/logos/philips.svg',
-bluray:'./assets/logos/blu-ray.svg',
-hddvd:'https://upload.wikimedia.org/wikipedia/commons/a/a4/HD-DVD.svg',
-cd:'https://upload.wikimedia.org/wikipedia/commons/e/ed/Compact_Disc_wordmark.svg',
-vhs:'./assets/logos/vhs.svg'
+const dimensions=[['classic','Classic Earth',0,1,1,'#000000'],['neon','Neon Grid',1e6,1.15,1.5,'#061522'],['cosmic','Cosmic Expanse',1e12,1.35,3,'#10091f'],['void','The Void',1e20,1.65,7,'#080b18']];
+let saved={};try{saved=JSON.parse(localStorage.getItem(SAVE_KEY)||'{}')||{}}catch(e){}
+const state={
+cash:Math.max(0,Number(saved.cash)||0),hits:Math.max(0,Number(saved.hits)||0),walls:Math.max(0,Number(saved.wallHits)||0),
+lifetime:Math.max(Number(saved.lifetimeHits)||0,Number(saved.hits)||0),totalEarned:Math.max(Number(saved.totalEarned)||0,Number(saved.cash)||0),
+prestiges:Math.max(0,Number(saved.prestiges)||0),levels:{},endLevels:{},theme:saved.theme||'classic',logo:saved.activeLogo||'dvd',
+dimension:dimensions.some(d=>d[0]===saved.activeDimension)?saved.activeDimension:'classic',factory:Math.max(0,Number(saved.factoryLevel)||0),
+ascensions:Math.max(0,Number(saved.ascensions)||0),shards:Math.max(0,Number(saved.cosmicShards)||0),
+combo:Math.max(0,Number(saved.bounceStreak)||0),cornerStreak:Math.max(0,Number(saved.cornerStreak)||0),
+rareEvents:Math.max(0,Number(saved.rareEvents)||0),rareOwned:Array.isArray(saved.rareOwned)?[...new Set(['normal',...saved.rareOwned])]:['normal'],
+rareVariant:saved.rareVariant||'normal',claimed:new Set(Array.isArray(saved.claimedAch)?saved.claimedAch:[]),paused:false,sound:false
 };
-const logoImages={},logoImageErrors={};
-Object.entries(logoAssets).forEach(([id,src])=>{
-  const image=new Image();
-  image.onload=()=>{logoImages[id]=image;};
-  image.onerror=()=>{logoImageErrors[id]=true;console.warn('Logo image failed to load:',id,src);};
-  image.src=src;
-});
-activeLogo=logoTypes.some(v=>v.id===saved.activeLogo&&lifetimeHits>=v.unlock)?saved.activeLogo:'dvd';
-for(let i=0;i<Math.min(19,upgrades[3].level);i++){let n=i+1;logos.push({id:++nextId,x:(95+n*137)%760,y:(55+n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999})}
-const money=n=>'$'+Math.floor(n).toLocaleString(),cost=u=>Math.floor(u.base*Math.pow(1.62,u.level));
-const activeDim=()=>dimensions.find(d=>d.id===activeDimension)||dimensions[0],factoryRate=()=>factoryLevel*factoryLevel*2500*Math.pow(1.25,cosmicShards);
-const speed=()=>Math.pow(1.15,upgrades[0].level)*bounceSpeed()*Math.pow(1.1,endgameUpgrades[1].level),payout=()=>10*Math.pow(2,upgrades[1].level)*Math.pow(1.5,prestiges)*Math.pow(1.25,endgameUpgrades[0].level);
-const today=()=>new Date().toLocaleDateString('en-CA');
-let daily=saved.daily&&saved.daily.date===today()?saved.daily:{date:today(),type:Math.floor(Date.now()/86400000)%3,baseHits:lifetimeHits,baseWalls:wallHits,buys:0,claimed:false};
-const dailySpecs=[{name:'Corner Collector',desc:'Land 5 corner hits today.',goal:5,reward:750},{name:'Wall Runner',desc:'Bounce off 100 walls today.',goal:100,reward:900},{name:'Upgrade Spree',desc:'Buy 2 upgrades today.',goal:2,reward:1100}];
-function save(){localStorage.setItem('dvd-corner-clicker-save',JSON.stringify({cash,hits,wallHits,lifetimeHits,prestiges,theme,activeLogo,bounceStreak,activeDimension,cosmicShards,totalEarned,factoryLevel,ascensions,levels:Object.fromEntries(upgrades.map(u=>[u.id,u.level])),endgameLevels:Object.fromEntries(endgameUpgrades.map(u=>[u.id,u.level])),cornerStreak,rareEvents,rareOwned,rareVariant,claimedAch:claimedAch,daily}))}
-const claimedAch=new Set(Array.isArray(saved.claimedAch)?saved.claimedAch:achievements.filter(a=>lifetimeHits>=a[1]).map(a=>a[0]));
-function toastMsg(s){toast.textContent=s;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show')}
-function dailyProgress(){let d=dailySpecs[daily.type];return daily.type===0?Math.max(0,lifetimeHits-daily.baseHits):daily.type===1?Math.max(0,wallHits-daily.baseWalls):daily.buys}
-function checkDaily(){let d=dailySpecs[daily.type];if(!daily.claimed&&dailyProgress()>=d.goal){daily.claimed=true;cash+=d.reward;toastMsg('DAILY CHALLENGE COMPLETE! +'+money(d.reward));save()}}
-function renderDaily(){let d=dailySpecs[daily.type],p=Math.min(d.goal,dailyProgress());document.getElementById('dailyChallenge').innerHTML='<strong>'+d.name+'</strong><p>'+d.desc+'</p><div class="progress-track"><div class="progress-fill" style="width:'+(p/d.goal*100)+'%"></div></div><div class="daily-foot">'+(daily.claimed?'Completed · ':'Progress · ')+p.toLocaleString()+' / '+d.goal.toLocaleString()+' · Reward '+money(d.reward)+'</div>'}
-function renderShop(){const root=document.getElementById('shop');root.innerHTML='';upgrades.forEach(u=>{let card=document.createElement('article');card.className='shop-card';let h=document.createElement('h3');h.textContent=u.name+' · Lv. '+u.level;let p=document.createElement('p');p.textContent=u.desc;let row=document.createElement('div');row.className='buy-row';let price=document.createElement('span');price.textContent=money(cost(u));let b=document.createElement('button');b.textContent='Buy';b.disabled=cash<cost(u);b.onclick=()=>{if(cash<cost(u))return;cash-=cost(u);u.level++;daily.buys++;if(u.id==='dvd'&&logos.length<20){let n=logos.length;logos.push({id:++nextId,x:80+(n*131)%700,y:40+(n*79)%390,vx:(n%2?1:-1)*(2.2+(n%3)*.3),vy:(n%2?-1:1)*(1.8+(n%4)*.2),w:150,h:90,lastX:-99999,lastY:-99999,lastCorner:-99999})}save();renderShop();updateUI();checkDaily()};row.append(price,b);card.append(h,p,row);root.append(card)})}
-function renderEndgame(){const root=document.getElementById('endgameShop');root.innerHTML='';endgameUpgrades.forEach(u=>{let card=document.createElement('article');card.className='endgame-card';let h=document.createElement('h3');h.textContent=u.name+' · Lv. '+u.level;let p=document.createElement('p');p.className='hint';p.textContent=u.desc;let row=document.createElement('div');row.className='buy-row';let price=document.createElement('span');let c=Math.floor(u.base*Math.pow(8,u.level));price.textContent=money(c);let b=document.createElement('button');b.textContent='Buy';b.disabled=cash<c;b.onclick=()=>{if(cash<c)return;cash-=c;u.level++;save();renderEndgame();updateUI()};row.append(price,b);card.append(h,p,row);root.append(card)})}
-function renderRare(){let root=document.getElementById('rareVariants');root.innerHTML='';[['normal','Original'],['gold','Gold'],['chrome','Chrome'],['holo','Holographic']].forEach(([id,label])=>{let b=document.createElement('button');b.textContent=(rareOwned.includes(id)?'':'🔒 ')+label;b.disabled=!rareOwned.includes(id);b.classList.toggle('active',rareVariant===id);b.onclick=()=>{rareVariant=id;save();renderRare();toastMsg(label.toUpperCase()+' VARIANT EQUIPPED')};root.append(b)});document.getElementById('rareStatus').textContent=rareOwned.length+' / 4 variants discovered'}
-function renderSecrets(){let root=document.getElementById('secretAchievements');root.innerHTML='';let count=0;secretDefs.forEach(([name,desc,check])=>{let ok=check();if(ok)count++;let el=document.createElement('div');el.className='secret-item'+(ok?' unlocked':'');el.textContent=(ok?'★ ':'🔒 ')+ (ok?name: '???')+' — '+(ok?desc:'Hidden achievement');root.append(el)});document.getElementById('secretProgress').textContent=count+' / 4 discovered'}
-function checkSecrets(){let newly=[];secretDefs.forEach(([name,desc,check])=>{if(check()&&!claimedAch.has('secret:'+name)){claimedAch.add('secret:'+name);cash+=Math.max(100,Math.floor(payout()*5));newly.push(name)}});if(newly.length)toastMsg('SECRET FOUND: '+newly.join(', ')+'!');renderSecrets();save()}
-function renderAchievements(){let root=document.getElementById('achievements');root.innerHTML='';let count=0;achievements.forEach(a=>{let ok=claimedAch.has(a[0]);if(ok)count++;let el=document.createElement('div');el.className='achievement'+(ok?' unlocked':'');let h=document.createElement('strong');h.textContent=(ok?'✓ ':'🔒 ')+a[0];let p=document.createElement('span');p.textContent=ok?'Earned · '+money(a[2]):a[1]+' lifetime hits · '+money(a[2]);el.append(h,p);root.append(el)});document.getElementById('achievementProgress').textContent=count+' / 6 unlocked'}
-function renderThemes(){let root=document.getElementById('themes');root.innerHTML='';themes.forEach(t=>{let b=document.createElement('button');b.textContent=t[0]+(lifetimeHits>=t[1]?'':' · '+t[1]+' hits');b.disabled=lifetimeHits<t[1];b.classList.toggle('active',theme===t[0].toLowerCase());b.onclick=()=>{theme=t[0].toLowerCase();save();renderThemes();updateThemeStatus()};root.append(b)});updateThemeStatus()}
-function updateThemeStatus(){document.getElementById('themeStatus').textContent=theme[0].toUpperCase()+theme.slice(1)+' appearance selected. '+(themes.filter(t=>lifetimeHits>=t[1]).length)+' / '+themes.length+' appearances unlocked.'}
-function renderCollection(){document.getElementById('collectionProgress').textContent=logoTypes.filter(v=>lifetimeHits>=v.unlock).length+' / '+logoTypes.length+' logos unlocked';let root=document.getElementById('logoCollection');root.innerHTML='';logoTypes.forEach(v=>{let b=document.createElement('button');let unlocked=lifetimeHits>=v.unlock;b.textContent=(unlocked?'':'🔒 ')+v.name+(unlocked?'':' · '+v.unlock+' hits');b.disabled=!unlocked;b.classList.toggle('active',activeLogo===v.id);b.onclick=()=>{activeLogo=v.id;save();renderCollection();document.querySelector('.screen-label').textContent=v.name.toUpperCase();toastMsg(v.name.toUpperCase()+' EQUIPPED!')};root.append(b)});document.querySelector('.screen-label').textContent=logoTypes.find(v=>v.id===activeLogo).name.toUpperCase();}
-function updatePrestige(){let needHits=1000,needCash=100000,can=hits>=needHits&&cash>=needCash;document.getElementById('prestigeLevel').textContent='Prestige '+prestiges+' · Permanent payout multiplier '+Math.pow(1.5,prestiges).toFixed(2)+'×';document.getElementById('prestigeButton').disabled=!can;document.getElementById('prestigeHint').textContent=can?'Ready! Reset cash, run hits, wall bounces and upgrades for a permanent 1.5× payout bonus.':'Requires '+needHits.toLocaleString()+' run corner hits and '+money(needCash)+'. You currently have '+hits.toLocaleString()+' hits and '+money(cash)+'.'}
-function updateUI(){document.getElementById('cash').textContent=money(cash);document.getElementById('hits').textContent=hits.toLocaleString();document.getElementById('wallHits').textContent=wallHits.toLocaleString();document.getElementById('perHit').textContent=money(payout());document.getElementById('speed').textContent=speed().toFixed(2)+'×';[...document.querySelectorAll('.shop-card button')].forEach((b,i)=>b.disabled=cash<cost(upgrades[i]));renderAchievements();renderThemes();renderCollection();renderDaily();renderEndgame();renderRare();renderSecrets();updatePrestige();renderDimensions();renderFactory();updateAscension();updateInfiniteGoal()}
-function hit(logo){hits++;lifetimeHits++;cornerStreak++;let eventMult=worldEvent?.[0]==='Golden Rain'?5:worldEvent?.[0]==='Double Cash Hour'?2:worldEvent?.[0]==='Corner Apocalypse'?25:1;let reward=payout()*activeDim().payout*eventMult;if(logo.id===goldId&&performance.now()<goldUntil){reward*=10;goldId=null;goldUntil=0;toastMsg('✨ GOLDEN CORNER! +'+money(reward))}else toastMsg('CORNER HIT! +'+money(reward));cash+=reward;totalEarned+=reward;achievements.filter(a=>lifetimeHits>=a[1]&&!claimedAch.has(a[0])).forEach(a=>{claimedAch.add(a[0]);cash+=a[2];toastMsg('ACHIEVEMENT: '+a[0]+' +'+money(a[2]))});checkDaily();checkSecrets();save();updateUI()}
-function colorFor(l,t){if(rareVariant==='gold')return '#ffd447';if(rareVariant==='chrome')return '#c8d4df';if(rareVariant==='holo')return 'hsl('+(Math.floor(t/5)%360)+' 100% 68%)';if(l.id===goldId&&t<goldUntil)return '#ffd447';if(theme==='rainbow')return 'hsl('+(Math.floor(t/8+l.id*73)%360)+' 100% 62%)';if(theme==='neon')return ['#00f5ff','#ff00d4','#b6ff00','#8b5cff'][colorIndex%4];if(theme==='golden')return '#ffc84a';if(theme==='midnight')return ['#9aa7ff','#b7c8ff','#7379c9'][colorIndex%3];return colors[colorIndex%colors.length]}
-const tintedLogoCache={};
-function draw(l,t){
-  const image=logoImages[activeLogo];
-  ctx.save();
-  ctx.globalAlpha=1;
-  ctx.globalCompositeOperation='source-over';
-  ctx.filter='none';
-  ctx.shadowBlur=0;
-  if(image&&image.complete&&image.naturalWidth>0){
-    const pad=5;
-    const scale=Math.min((l.w-pad*2)/image.naturalWidth,(l.h-pad*2)/image.naturalHeight);
-    const dw=image.naturalWidth*scale,dh=image.naturalHeight*scale;
-    const color=colorFor(l,t);
-    let cached=tintedLogoCache[activeLogo];
-    if(!cached||cached.color!==color){
-      const stamp=document.createElement('canvas');
-      stamp.width=Math.max(1,Math.round(dw));
-      stamp.height=Math.max(1,Math.round(dh));
-      const stampCtx=stamp.getContext('2d');
-      stampCtx.clearRect(0,0,stamp.width,stamp.height);
-      stampCtx.drawImage(image,0,0,stamp.width,stamp.height);
-      stampCtx.globalCompositeOperation='source-in';
-      stampCtx.fillStyle=color;
-      stampCtx.fillRect(0,0,stamp.width,stamp.height);
-      cached=tintedLogoCache[activeLogo]={color,canvas:stamp};
-    }
-    ctx.drawImage(cached.canvas,l.x+(l.w-dw)/2,l.y+(l.h-dh)/2,dw,dh);
-  }else{
-    const failed=!!logoImageErrors[activeLogo];
-    ctx.fillStyle=colorFor(l,t);
-    ctx.textAlign='center';
-    ctx.textBaseline='middle';
-    ctx.font='bold 15px Arial,sans-serif';
-    ctx.fillText(failed?'Logo unavailable':(logoTypes.find(v=>v.id===activeLogo)?.name||'DVD'),l.x+l.w/2,l.y+l.h/2);
-  }
-  ctx.restore();
-}
-function updateBounceCount(){document.getElementById('wallHits').textContent=wallHits.toLocaleString();document.getElementById('bounceCombo').textContent=comboMultiplier().toFixed(2)+'×';document.getElementById('speedStage').textContent=bounceSpeed().toFixed(2)+'×'}
-function renderDimensions(){const root=document.getElementById('dimensions');root.innerHTML='';dimensions.forEach(d=>{let b=document.createElement('button'),unlocked=totalEarned>=d.unlock||cash>=d.unlock;b.textContent=(unlocked?'':'🔒 ')+d.name+(unlocked?'':' · '+money(d.unlock));b.disabled=!unlocked;b.classList.toggle('active',activeDimension===d.id);b.onclick=()=>{activeDimension=d.id;save();renderDimensions();toastMsg(d.name.toUpperCase()+' ENTERED')};root.append(b)});document.getElementById('dimensionStatus').textContent='Current: '+activeDim().name+' · '+activeDim().payout+'× payouts · '+activeDim().speed+'× movement';canvas.style.background=activeDim().bg}
-function renderFactory(){document.getElementById('reactorRate').textContent=money(factoryRate())+'/sec';const root=document.getElementById('factoryShop');root.innerHTML='';let price=Math.floor(2500*Math.pow(2.15,factoryLevel)),card=document.createElement('article');card.className='endgame-card';let h=document.createElement('h3');h.textContent='DVD Factory · Lv. '+factoryLevel;let p=document.createElement('p');p.className='hint';p.textContent='Build the next factory to increase passive income.';let row=document.createElement('div');row.className='buy-row';let label=document.createElement('span');label.textContent=money(price);let b=document.createElement('button');b.textContent='Build';b.disabled=cash<price;b.onclick=()=>{if(cash<price)return;cash-=price;factoryLevel++;save();updateUI()};row.append(label,b);card.append(h,p,row);root.append(card)}
-function updateAscension(){let gain=cash>=1e18?Math.max(1,Math.floor(Math.log10(cash/1e18))+1):0;document.getElementById('shardCount').textContent=cosmicShards.toLocaleString()+' Cosmic Shards · Ascensions '+ascensions;document.getElementById('ascensionHint').textContent=gain?'Ascend now for '+gain+' Cosmic Shards. Each shard boosts factory production by 25%.':'Requires $1 quintillion. Current cash: '+money(cash);document.getElementById('ascendButton').disabled=!gain}
-function ascend(){let gain=cash>=1e18?Math.max(1,Math.floor(Math.log10(cash/1e18))+1):0;if(!gain)return;if(!confirm('Ascend for '+gain+' Cosmic Shards? Cash, run upgrades and factories reset.'))return;cosmicShards+=gain;ascensions++;cash=0;hits=0;wallHits=0;factoryLevel=0;bounceStreak=0;upgrades.forEach(u=>u.level=0);endgameUpgrades.forEach(u=>u.level=0);logos.splice(1);save();renderShop();updateUI();toastMsg('COSMIC ASCENSION! +'+gain+' SHARDS')}
-function updateInfiniteGoal(){let unlocked=dimensions.filter(d=>d.unlock===0||totalEarned>=d.unlock).length;let done=unlocked===dimensions.length&&cosmicShards>=100&&totalEarned>=1e30;document.getElementById('infiniteProgress').textContent=done?'★ INFINITE CORNER MASTERED!':'Dimensions '+unlocked+'/4 · Cosmic Shards '+cosmicShards+'/100 · Lifetime earnings '+money(totalEarned)+' / '+money(1e30)}
-function beginEvent(t){let events=[['Golden Rain','Corner payouts ×5',5],['Rainbow Frenzy','Rare bounces become 10× more likely',1],['Double Cash Hour','Factory and corner income ×2',2],['Corner Apocalypse','Corner payouts ×25',25],['Cosmic DVD','Instant cosmic cash drop',1]];worldEvent=events[Math.floor(Math.random()*events.length)];eventUntil=t+20000;document.getElementById('eventStatus').textContent='⚡ '+worldEvent[0]+' — '+worldEvent[1]+' · 20 seconds';if(worldEvent[0]==='Cosmic DVD'){let bonus=Math.max(1e6,payout()*1000);cash+=bonus;totalEarned+=bonus;toastMsg('🌌 COSMIC DVD! +'+money(bonus));save()}else toastMsg('WORLD EVENT: '+worldEvent[0]+'!')}
-
-function prestige(){if(hits<1000||cash<100000)return;if(!confirm('Prestige now? Your cash, run stats and upgrades reset. You keep achievements, appearances and gain a permanent 1.5× payout multiplier.'))return;prestiges++;cash=0;hits=0;wallHits=0;bounceStreak=0;lastBounceAt=0;upgrades.forEach(u=>u.level=0);endgameUpgrades.forEach(u=>u.level=0);logos.splice(1);logos[0].x=180;logos[0].y=130;logos[0].vx=2.45;logos[0].vy=1.83;logos[0].lastX=-99999;logos[0].lastY=-99999;goldId=null;theme='classic';save();renderShop();updateUI();toastMsg('PRESTIGE '+prestiges+'! PAYOUT BOOSTED')}
-document.getElementById('prestigeButton').addEventListener('click',prestige);
-function frame(t){let dt=Math.min((t-last)/16.667||1,2.5);last=t;if(t-lastBounceAt>5000&&bounceStreak){bounceStreak=0;updateBounceCount();save()}ctx.clearRect(0,0,W,H);ctx.save();if(shake>0.2){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.84}else shake=0;if(t>=nextGold){goldId=logos[Math.floor(Math.random()*logos.length)].id;goldUntil=t+12000;nextGold=t+Math.max(12000,90000/(1+upgrades[4].level*.45))+Math.random()*25000;toastMsg('✨ GOLDEN DVD APPEARED!')}
-if(!nextEventAt)nextEventAt=t+20000+Math.random()*20000;if(worldEvent&&t>=eventUntil){worldEvent=null;document.getElementById('eventStatus').textContent='Event ended · Next event soon'}if(!worldEvent&&t>=nextEventAt){beginEvent(t);nextEventAt=t+55000+Math.random()*45000}let seconds=lastFactoryTick?Math.min((t-lastFactoryTick)/1000,.25):0;lastFactoryTick=t;if(seconds&&factoryRate()){let income=factoryRate()*seconds*(worldEvent?.[0]==='Double Cash Hour'?2:1);cash+=income;totalEarned+=income;document.getElementById('cash').textContent=money(cash);if(t-lastPassiveUI>1000){lastPassiveUI=t;renderFactory();renderDimensions();updateAscension();updateInfiniteGoal()}}logos.forEach(l=>{l.x+=l.vx*speed()*activeDim().speed*dt;l.y+=l.vy*speed()*activeDim().speed*dt;let hx=false,hy=false;if(l.x<=0){l.x=0;l.vx=Math.abs(l.vx);hx=true}else if(l.x+l.w>=W){l.x=W-l.w;l.vx=-Math.abs(l.vx);hx=true}if(l.y<=0){l.y=0;l.vy=Math.abs(l.vy);hy=true}else if(l.y+l.h>=H){l.y=H-l.h;l.vy=-Math.abs(l.vy);hy=true}if(hx){l.lastX=t;cornerStreak=0;wallHits++;colorIndex=(colorIndex+1)%colors.length;processWallBounce(l,l.x+(l.x===0?0:l.w),l.y+l.h/2)}if(hy){l.lastY=t;cornerStreak=0;wallHits++;colorIndex=(colorIndex+1)%colors.length;processWallBounce(l,l.x+l.w/2,l.y+(l.y===0?0:l.h))}if(hx||hy){updateBounceCount()}let grace=350+(upgrades[2].level+upgrades[5].level)*100;if(t-l.lastX<=grace&&t-l.lastY<=grace&&t-l.lastCorner>500){l.lastCorner=t;hit(l)}draw(l,t)});particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vx*=.97;p.vy=p.vy*.97+.035;p.life--;ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=14;ctx.fillRect(p.x,p.y,p.size,p.size)});for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);floaters.forEach(f=>{f.y-=.8;f.life--;ctx.globalAlpha=Math.max(0,f.life/f.max);ctx.fillStyle=f.color;ctx.font='900 20px Arial';ctx.textAlign='center';ctx.shadowColor=f.color;ctx.shadowBlur=12;ctx.fillText(f.text,f.x,f.y)});for(let i=floaters.length-1;i>=0;i--)if(floaters[i].life<=0)floaters.splice(i,1);ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.restore();checkDaily();requestAnimationFrame(frame)}
-renderShop();renderEndgame();updateUI();document.getElementById('ascendButton').addEventListener('click',ascend);requestAnimationFrame(frame);
-})();</script>
+upgradeDefs.forEach(u=>state.levels[u[0]]=Math.max(0,Number(saved.levels?.[u[0]])||0));
+endDefs.forEach(u=>state.endLevels[u[0]]=Math.max(0,Number(saved.endgameLevels?.[u[0]])||0));
+if(!themeDefs.some(t=>t[0].toLowerCase()===state.theme&&state.lifetime>=t[1]))state.theme='classic';
+if(!logoTypes.some(l=>l.id===state.logo&&state.lifetime>=l.unlock))state.logo='dvd';
+const imgs={};logoTypes.forEach(l=>{const im=new Image();im.onload=()=>imgs[l.id]=im;im.onerror=()=>{};im.src=l.src});
+const logos=[{x:170,y:115,vx:2.5,vy:1.9,w:148,h:86,wallAt:[],lastCorner:0}];
+let nextGold=now()+26000+Math.random()*18000,goldUntil=0,rareHue=0,lastFrame=0,lastSave=0,lastUI=0,lastEvent=0,event=null,eventUntil=0,toastTimer=0,shake=0;
+const particles=[],floaters=[];
+for(let i=0;i<Math.min(19,state.levels.dvd);i++)addLogo(i+1);
+function addLogo(n){logos.push({x:70+(n*137)%760,y:45+(n*83)%390,vx:(n%2?1:-1)*(2.1+(n%3)*.35),vy:(n%2?-1:1)*(1.7+(n%4)*.2),w:148,h:86,wallAt:[],lastCorner:0})}
+function dimension(){return dimensions.find(d=>d[0]===state.dimension)||dimensions[0]}
+function speed(){return Math.pow(1.15,state.levels.speed||0)*Math.min(3,1+Math.floor(state.walls/25)*.05)*Math.pow(1.1,state.endLevels.overdrive||0)}
+function payout(){return 10*Math.pow(2,state.levels.payout||0)*Math.pow(1.5,state.prestiges)*Math.pow(1.25,state.endLevels.fortune||0)*dimension()[4]*Math.pow(1.25,state.shards)}
+function comboMult(){return Math.min(5+(state.endLevels.combo||0)*.5,1+Math.floor(state.combo/10)*.25)}
+function cost(id){const u=upgradeDefs.find(x=>x[0]===id);return Math.floor(u[3]*Math.pow(1.62,state.levels[id]||0))}
+function endCost(id){const u=endDefs.find(x=>x[0]===id);return Math.floor(u[3]*Math.pow(8,state.endLevels[id]||0))}
+function save(){const data={cash:state.cash,hits:state.hits,wallHits:state.walls,lifetimeHits:state.lifetime,totalEarned:state.totalEarned,prestiges:state.prestiges,theme:state.theme,activeLogo:state.logo,bounceStreak:state.combo,activeDimension:state.dimension,factoryLevel:state.factory,ascensions:state.ascensions,cosmicShards:state.shards,levels:state.levels,endgameLevels:state.endLevels,cornerStreak:state.cornerStreak,rareEvents:state.rareEvents,rareOwned:state.rareOwned,rareVariant:state.rareVariant,claimedAch:[...state.claimed],daily:state.daily};try{localStorage.setItem(SAVE_KEY,JSON.stringify(data));$('saveState').textContent='● AUTO-SAVED'}catch(e){$('saveState').textContent='SAVE UNAVAILABLE'}}
+function toast(s){$('toast').textContent=s;$('toast').classList.remove('show');void $('toast').offsetWidth;$('toast').classList.add('show')}
+function addCash(n){state.cash+=n;state.totalEarned+=n}
+function burst(x,y,color,critical=false){for(let i=0;i<(critical?38:15);i++){const a=Math.random()*Math.PI*2,v=(critical?3:1.5)+Math.random()*(critical?7:4);particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v,life:critical?48:30,max:critical?48:30,size:2+Math.random()*4,color})}shake=Math.max(shake,critical?10:3)}
+function floatText(x,y,text,color){floaters.push({x,y,text,color,life:55,max:55})}
+function colorAt(t){if(state.rareVariant==='gold')return '#ffd45e';if(state.rareVariant==='chrome')return '#e7f2ff';if(state.rareVariant==='holo'||state.theme==='rainbow')return 'hsl('+((t*.06+rareHue)%360)+' 100% 67%)';if(state.theme==='golden')return '#ffd15c';if(state.theme==='neon')return ['#39e8ff','#d55cff','#62ffae'][Math.floor(t/900)%3];if(state.theme==='midnight')return '#8eabff';return ['#20d9e8','#f04c4c','#f5d547','#55df75','#a878f5','#ff8bce'][Math.floor(t/1100)%6]}
+function isGolden(l){return l.goldenUntil>now()}
+function awardCorner(l,x,y){state.hits++;state.lifetime++;state.cornerStreak++;state.combo++;const critical=Math.random()<.055;let reward=Math.max(1,Math.floor(payout()*comboMult()*(critical?10:1)));if(isGolden(l))reward*=10;const rainbowChance=Math.min(.25,.008*Math.pow(2,state.endLevels.luck||0))*(event==='Rainbow Frenzy'?8:1);if(Math.random()<rainbowChance){state.rareEvents++;if(!state.rareOwned.includes('holo'))state.rareOwned.push('holo');reward*=100;toast('🌈 RAINBOW BOUNCE! +'+fmt(reward));for(let i=0;i<5;i++)burst(x,y,'hsl('+(i*72)+' 100% 65%)',true)}addCash(reward);burst(x,y,critical?'#fff16a':colorAt(now()),critical);floatText(x,y,(critical?'CRITICAL! ':'+')+fmt(reward),critical?'#fff16a':colorAt(now()));if(critical)toast('⚡ CRITICAL CORNER!');$('bounceInfo').textContent='Corner hit! +'+fmt(reward);checkAchievements();checkSecrets();checkDaily();save();renderAll()}
+function wallBounce(l,side){state.walls++;state.combo=Math.max(0,state.combo);l.wallAt.push({side,t:now()});l.wallAt=l.wallAt.filter(v=>now()-v.t<windowMs());const hasX=l.wallAt.some(v=>v.side==='left'||v.side==='right'),hasY=l.wallAt.some(v=>v.side==='top'||v.side==='bottom');if(hasX&&hasY&&now()-l.lastCorner>420){l.lastCorner=now();l.wallAt=[];const px=l.x+l.w/2,py=l.y+l.h/2;awardCorner(l,px,py)}else{$('bounceInfo').textContent='Wall bounce · '+num(state.walls)}}
+function windowMs(){return 650+(state.levels.grace||0)*90+(state.levels.magnet||0)*120}
+const dailySpecs=[['Corner Collector','Land 5 corner hits today.',5,750],['Wall Runner','Bounce off 100 walls today.',100,900],['Upgrade Spree','Buy 2 upgrades today.',2,1100]];
+function dateKey(){const d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()}
+if(!saved.daily||saved.daily.date!==dateKey())state.daily={date:dateKey(),type:Math.floor(Date.now()/86400000)%3,baseHits:state.lifetime,baseWalls:state.walls,buys:0,claimed:false};else state.daily=saved.daily;
+function dailyProgress(){return state.daily.type===0?state.lifetime-state.daily.baseHits:state.daily.type===1?state.walls-state.daily.baseWalls:state.daily.buys}
+function checkDaily(){const d=dailySpecs[state.daily.type];if(!state.daily.claimed&&dailyProgress()>=d[2]){state.daily.claimed=true;addCash(d[3]);toast('DAILY COMPLETE! +'+fmt(d[3]));save()}}
+function checkAchievements(){achievementDefs.forEach(([name,goal,reward])=>{if(state.lifetime>=goal&&!state.claimed.has(name)){state.claimed.add(name);addCash(reward);toast('ACHIEVEMENT: '+name+' +'+fmt(reward))}})}
+const secretDefs=[['Tenfold','Land 10 corner hits in a row',()=>state.cornerStreak>=10],['Wallflower','Reach 1,000 wall bounces',()=>state.walls>=1000],['Speed Demon','Reach 100× DVD speed',()=>speed()>=100],['Rainbow Hunter','Trigger a rainbow bounce',()=>state.rareEvents>0]];
+function checkSecrets(){secretDefs.forEach(([name,,test])=>{const id='secret:'+name;if(test()&&!state.claimed.has(id)){state.claimed.add(id);const reward=Math.max(100,Math.floor(payout()*5));addCash(reward);toast('SECRET FOUND: '+name+' +'+fmt(reward))}})}
+function buyUpgrade(id){const price=cost(id);if(state.cash<price)return;state.cash-=price;state.levels[id]++;if(id==='dvd'&&logos.length<20)addLogo(logos.length);if(state.daily)state.daily.buys++;save();renderAll();checkDaily();toast('UPGRADE PURCHASED')}
+function buyEnd(id){const price=endCost(id);if(state.cash<price)return;state.cash-=price;state.endLevels[id]++;save();renderAll();toast('RESEARCH COMPLETE')}
+function renderShop(){const root=$('shop');root.innerHTML='';upgradeDefs.forEach(([id,name,desc])=>{const price=cost(id),lv=state.levels[id]||0,el=document.createElement('article');el.className='shop-card';el.innerHTML='<h3>'+name+' · Lv. '+lv+'</h3><p>'+desc+'</p><div class="buy-row"><span>'+fmt(price)+'</span><button '+(state.cash<price?'disabled':'')+'>Buy</button></div>';el.querySelector('button').onclick=()=>buyUpgrade(id);root.append(el)});$('upgradeCount').textContent=upgradeDefs.reduce((a,u)=>a+(state.levels[u[0]]||0),0)+' total levels'}
+function renderEnd(){const root=$('endgameShop');root.innerHTML='';endDefs.forEach(([id,name,desc])=>{const price=endCost(id),lv=state.endLevels[id]||0,el=document.createElement('article');el.className='shop-card';el.innerHTML='<h3>'+name+' · Lv. '+lv+'</h3><p>'+desc+'</p><div class="buy-row"><span>'+fmt(price)+'</span><button '+(state.cash<price?'disabled':'')+'>Research</button></div>';el.querySelector('button').onclick=()=>buyEnd(id);root.append(el)})}
+function renderDaily(){const d=dailySpecs[state.daily.type],p=Math.min(d[2],dailyProgress());$('dailyName').textContent=d[0];$('dailyDesc').textContent=d[1];$('dailyReward').textContent='Reward '+fmt(d[3]);$('dailyBar').style.width=(p/d[2]*100)+'%';$('dailyProgress').textContent=p+' / '+d[2];$('dailyState').textContent=state.daily.claimed?'Reward claimed':'In progress'}
+function renderCollection(){const root=$('logoCollection');root.innerHTML='';logoTypes.forEach(l=>{const ok=state.lifetime>=l.unlock,b=document.createElement('button');b.className='pill'+(state.logo===l.id?' active':'');b.disabled=!ok;b.textContent=(ok?'':'🔒 ')+l.name+(ok?'':' · '+l.unlock+' hits');b.onclick=()=>{state.logo=l.id;save();renderCollection();$('logoLabel').textContent=l.name.toUpperCase()+' · '+dimension()[1].toUpperCase()};root.append(b)});$('collectionProgress').textContent=logoTypes.filter(l=>state.lifetime>=l.unlock).length+' / 6 unlocked'}
+function renderRare(){const root=$('rareVariants');root.innerHTML='';[['normal','Original'],['gold','Gold'],['chrome','Chrome'],['holo','Holographic']].forEach(([id,label])=>{const b=document.createElement('button');b.className='pill'+(state.rareVariant===id?' active':'');b.disabled=!state.rareOwned.includes(id);b.textContent=(b.disabled?'🔒 ':'')+label;b.onclick=()=>{state.rareVariant=id;save();renderRare()};root.append(b)});$('rareStatus').textContent=state.rareOwned.length+' / 4 found'}
+function renderThemes(){const root=$('themes');root.innerHTML='';themeDefs.forEach(([name,need])=>{const id=name.toLowerCase(),b=document.createElement('button');b.className='pill'+(state.theme===id?' active':'');b.disabled=state.lifetime<need;b.textContent=name+(b.disabled?' · '+need+' hits':'');b.onclick=()=>{state.theme=id;save();renderThemes();renderAll()};root.append(b)});$('themeStatus').textContent=themeDefs.filter(t=>state.lifetime>=t[1]).length+' / 5 unlocked'}
+function renderAchievements(){const root=$('achievements');root.innerHTML='';let count=0;achievementDefs.forEach(([name,goal,reward])=>{const ok=state.claimed.has(name);if(ok)count++;const el=document.createElement('div');el.className='list-item'+(ok?' done':'');el.innerHTML='<div><strong>'+(ok?'✓ ':'🔒 ')+name+'</strong><small>'+(ok?'Completed':num(goal)+' lifetime hits')+'</small></div><strong>'+fmt(reward)+'</strong>';root.append(el)});$('achievementProgress').textContent=count+' / 6 complete';const sec=$('secretAchievements');sec.innerHTML='';let found=0;secretDefs.forEach(([name,desc,test])=>{const ok=test();if(ok)found++;const el=document.createElement('div');el.className='list-item'+(ok?' done':'');el.innerHTML='<div><strong>'+(ok?'★ '+name:'🔒 ???')+'</strong><small>'+(ok?desc:'Hidden achievement')+'</small></div>';sec.append(el)});$('secretProgress').textContent=found+' / 4 found'}
+function renderDimensions(){const root=$('dimensions');root.innerHTML='';dimensions.forEach(d=>{const ok=state.totalEarned>=d[2],el=document.createElement('article');el.className='item-card';el.innerHTML='<h3>'+d[1]+'</h3><p>Reward multiplier: '+d[4].toFixed(2)+'×'+(ok?' · Unlocked':' · Requires '+fmt(d[2])+' lifetime cash')+'</p><div class="buy-row"><span>'+(state.dimension===d[0]?'ACTIVE':'AVAILABLE')+'</span><button '+(!ok||state.dimension===d[0]?'disabled':'')+'>'+(state.dimension===d[0]?'Selected':'Travel')+'</button></div>';el.querySelector('button').onclick=()=>{state.dimension=d[0];save();renderAll();toast('ENTERED '+d[1].toUpperCase())};root.append(el)});$('dimensionStatus').textContent=dimension()[1]+' selected'}
+function renderFactory(){const price=Math.floor(2500*Math.pow(2.15,state.factory)),rate=state.factory*state.factory*2500*Math.pow(1.25,state.shards);$('factoryLevel').textContent='Factory level '+state.factory;$('factoryDesc').textContent=rate>0?fmt(rate)+'/sec passive production':'Build your first factory to begin passive production.';$('reactorRate').textContent=fmt(rate)+'/sec';$('factoryBuy').textContent='Build factory · '+fmt(price);$('factoryBuy').disabled=state.cash<price}
+function renderPrestige(){const can=state.hits>=1000&&state.cash>=100000;$('prestigeLevel').textContent=state.prestiges;$('prestigeMult').textContent=Math.pow(1.5,state.prestiges).toFixed(2)+'×';$('prestigeBar').style.width=Math.min(100,Math.min(state.hits/1000,state.cash/100000)*100)+'%';$('prestigeHint').textContent=num(Math.min(state.hits,1000))+' / 1,000 run corners · '+fmt(state.cash)+' / $100,000';$('prestigeState').textContent=can?'Ready':'Locked';$('prestigeButton').disabled=!can}
+function updateMultiverse(){const rate=state.factory*state.factory*2500*Math.pow(1.25,state.shards),need=1e20,ascendReady=state.totalEarned>=need,shardReward=Math.max(1,Math.floor(Math.sqrt(state.totalEarned/need)));$('shardCount').textContent=num(state.shards)+' shards';$('ascensionBar').style.width=Math.min(100,state.totalEarned/need*100)+'%';$('ascensionHint').textContent=fmt(state.totalEarned)+' / $100.00Qi lifetime cash';$('ascensionReward').textContent='+'+num(shardReward)+' shards';$('ascendButton').disabled=!ascendReady;$('infiniteBar').style.width=Math.min(100,state.totalEarned/1e30*100)+'%';$('infiniteProgress').textContent=fmt(state.totalEarned)+' / $1e30 lifetime cash';$('infiniteState').textContent=state.totalEarned>=1e30?'INFINITE CORNER REACHED':'Not reached';$('infiniteDesc').textContent=state.totalEarned>=1e30?'You have reached the edge of the simulation. The corner is yours.':'The final milestone: earn $1e30 over the life of your save.';$('ascensions').textContent=num(state.ascensions);$('shardsStat').textContent=num(state.shards);$('rareEvents').textContent=num(state.rareEvents)}
+function renderAll(){ $('cash').textContent=fmt(state.cash);$('hits').textContent=num(state.lifetime);$('walls').textContent=num(state.walls);$('combo').textContent=comboMult().toFixed(2)+'×';$('speed').textContent=speed().toFixed(2)+'×';$('rate').textContent='+'+fmt(payout())+' base per corner hit';$('logoLabel').textContent=(logoTypes.find(l=>l.id===state.logo)?.name||'DVD Video').toUpperCase()+' · '+dimension()[1].toUpperCase();$('worldInfo').textContent=dimension()[1].toUpperCase();renderShop();renderDaily();renderCollection();renderRare();renderThemes();renderAchievements();renderDimensions();renderFactory();renderPrestige();updateMultiverse();$('totalEarned').textContent=fmt(state.totalEarned)}
+function prestige(){if(state.hits<1000||state.cash<100000)return;if(!confirm('Prestige will reset your current cash, run corner hits, and upgrades. Lifetime unlocks remain. Continue?'))return;state.prestiges++;state.cash=0;state.hits=0;state.combo=0;Object.keys(state.levels).forEach(k=>state.levels[k]=0);logos.splice(1);save();renderAll();toast('PRESTIGE COMPLETE · PERMANENT 1.5× BOOST')}
+function ascend(){if(state.totalEarned<1e20)return;const reward=Math.max(1,Math.floor(Math.sqrt(state.totalEarned/1e20)));if(!confirm('Ascend and reset cash, run upgrades, and factories for '+reward+' cosmic shards?'))return;state.shards+=reward;state.ascensions++;state.cash=0;state.hits=0;state.factory=0;state.combo=0;Object.keys(state.levels).forEach(k=>state.levels[k]=0);Object.keys(state.endLevels).forEach(k=>state.endLevels[k]=0);logos.splice(1);state.dimension='classic';save();renderAll();toast('COSMIC ASCENSION COMPLETE')}
+function triggerEvent(){if(event&&now()<eventUntil){toast('AN EVENT IS ALREADY ACTIVE');return}const events=[['Rainbow Frenzy','Rainbow bounce chance is boosted for 25 seconds.'],['Double Time','Factory production is doubled for 25 seconds.'],['Golden Rush','A golden DVD appears for 25 seconds.']];const e=events[Math.floor(Math.random()*events.length)];event=e[0];eventUntil=now()+25000;if(event==='Golden Rush')logos[0].goldenUntil=eventUntil;$('eventDesc').textContent=e[1];$('eventStatus').textContent='ACTIVE · 25s';toast('WORLD EVENT: '+event.toUpperCase())}
+function tintImage(img,color){const c=document.createElement('canvas');c.width=img.naturalWidth||300;c.height=img.naturalHeight||150;const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);g.globalCompositeOperation='source-in';g.fillStyle=color;g.fillRect(0,0,c.width,c.height);return c}
+const tintCache=new Map();
+function drawLogo(l,t){const color=isGolden(l)?'#ffd45e':colorAt(t),im=imgs[state.logo];if(im&&im.complete&&im.naturalWidth){const key=state.logo+'|'+color;let tinted=tintCache.get(key);if(!tinted){tinted=tintImage(im,color);tintCache.set(key,tinted);if(tintCache.size>40)tintCache.clear()}ctx.drawImage(tinted,l.x,l.y,l.w,l.h)}else{ctx.save();ctx.fillStyle=color;ctx.font='900 38px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor=color;ctx.shadowBlur=14;ctx.fillText(logoTypes.find(v=>v.id===state.logo)?.text||'DVD',l.x+l.w/2,l.y+l.h/2);ctx.restore()}}
+function drawBackground(t){ctx.fillStyle=dimension()[5];ctx.fillRect(0,0,W,H);if(state.theme==='neon'||state.dimension==='neon'){ctx.strokeStyle='#1c6173';ctx.globalAlpha=.28;ctx.lineWidth=1;for(let x=0;x<W;x+=48){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}for(let y=0;y<H;y+=48){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke()}ctx.globalAlpha=1}if(state.theme==='midnight'||state.dimension==='cosmic'||state.dimension==='void'){for(let i=0;i<65;i++){const x=(i*157)%W,y=(i*83)%H;ctx.fillStyle='rgba(180,205,255,'+(0.15+Math.sin(t*.001+i)*.1)+')';ctx.fillRect(x,y,2,2)}}}
+function frame(t){requestAnimationFrame(frame);if(!lastFrame)lastFrame=t;const dt=Math.min(2,(t-lastFrame)/16.67);lastFrame=t;if(!state.paused){if(event&&t>eventUntil){event=null;$('eventStatus').textContent='Scanning';$('eventDesc').textContent='The anomaly has faded.'}if(t>nextGold){const l=logos[Math.floor(Math.random()*logos.length)];l.goldenUntil=t+18000;nextGold=t+30000+Math.random()*30000;toast('✨ GOLDEN LOGO APPEARED!')}const mult=speed()*dimension()[3]*(event==='Double Time'?1.2:1);logos.forEach(l=>{l.x+=l.vx*mult*dt;l.y+=l.vy*mult*dt;if(l.x<=0){l.x=0;l.vx=Math.abs(l.vx);wallBounce(l,'left')}else if(l.x+l.w>=W){l.x=W-l.w;l.vx=-Math.abs(l.vx);wallBounce(l,'right')}if(l.y<=0){l.y=0;l.vy=Math.abs(l.vy);wallBounce(l,'top')}else if(l.y+l.h>=H){l.y=H-l.h;l.vy=-Math.abs(l.vy);wallBounce(l,'bottom')}});const production=state.factory*state.factory*2500*Math.pow(1.25,state.shards)*(event==='Double Time'?2:1);if(production>0)addCash(production*dt/60);if(t-lastUI>1000){lastUI=t;renderAll()}if(t-lastSave>10000){lastSave=t;save()}}
+ctx.save();if(shake>0){ctx.translate((Math.random()-.5)*shake,(Math.random()-.5)*shake);shake*=.82}drawBackground(t);ctx.strokeStyle='rgba(120,160,210,.18)';ctx.lineWidth=2;ctx.strokeRect(1,1,W-2,H-2);if(state.theme==='golden'){ctx.strokeStyle='#a7792b';ctx.lineWidth=3;ctx.strokeRect(8,8,W-16,H-16)}logos.forEach(l=>drawLogo(l,t));particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vx*=.98;p.vy=p.vy*.98+.025*dt;p.life-=dt;ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.shadowColor=p.color;ctx.shadowBlur=12;ctx.fillRect(p.x,p.y,p.size,p.size)});for(let i=particles.length-1;i>=0;i--)if(particles[i].life<=0)particles.splice(i,1);floaters.forEach(f=>{f.y-=.8*dt;f.life-=dt;ctx.globalAlpha=Math.max(0,f.life/f.max);ctx.fillStyle=f.color;ctx.font='900 20px Arial';ctx.textAlign='center';ctx.shadowColor=f.color;ctx.shadowBlur=12;ctx.fillText(f.text,f.x,f.y)});for(let i=floaters.length-1;i>=0;i--)if(floaters[i].life<=0)floaters.splice(i,1);ctx.globalAlpha=1;ctx.shadowBlur=0;ctx.restore()}
+$('pauseBtn').onclick=()=>{state.paused=!state.paused;$('pauseBtn').textContent=state.paused?'Resume':'Pause';$('bounceInfo').textContent=state.paused?'Simulation paused':'Simulation resumed'};
+$('saveBtn').onclick=()=>{save();toast('GAME SAVED')};
+$('soundBtn').onclick=()=>{state.sound=!state.sound;$('soundBtn').textContent='Sound: '+(state.sound?'On':'Off');toast(state.sound?'Sound enabled':'Sound disabled')};
+$('factoryBuy').onclick=()=>{const price=Math.floor(2500*Math.pow(2.15,state.factory));if(state.cash<price)return;state.cash-=price;state.factory++;save();renderAll();toast('FACTORY BUILT')};
+$('eventButton').onclick=triggerEvent;$('prestigeButton').onclick=prestige;$('ascendButton').onclick=ascend;
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.id==='tab-'+b.dataset.tab))});
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});window.addEventListener('beforeunload',save);
+renderAll();requestAnimationFrame(frame);
+})();
+</script>
 </body>
 </html>
