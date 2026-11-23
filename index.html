@@ -122,19 +122,23 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
     const dt = baseDt;
     last = now;
     const b = bounds();
+    const maxX = Math.max(0, b.maxX);
+    const maxY = Math.max(0, b.maxY);
     x += vx*dt;
     y += vy*dt;
     let hitX = false, hitY = false;
-    if (x <= 0) { x=0; vx=Math.abs(vx); hitX=true; }
-    else if (x >= b.maxX) { x=b.maxX; vx=-Math.abs(vx); hitX=true; }
-    if (y <= 0) { y=0; vy=Math.abs(vy); hitY=true; }
-    else if (y >= b.maxY) { y=b.maxY; vy=-Math.abs(vy); hitY=true; }
+    if (x < 0) { x = -x; vx = Math.abs(vx); hitX = true; }
+    else if (x > maxX) { x = maxX - (x - maxX); vx = -Math.abs(vx); hitX = true; }
+    if (y < 0) { y = -y; vy = Math.abs(vy); hitY = true; }
+    else if (y > maxY) { y = maxY - (y - maxY); vy = -Math.abs(vy); hitY = true; }
+    x = Math.max(0, Math.min(maxX, x));
+    y = Math.max(0, Math.min(maxY, y));
     if (hitX || hitY) { triggerFlash(); if(!rainbowMode) changeColor(); }
     if (hitX) wallBounces++;
     if (hitY) wallBounces++;
     if (hitX && hitY) {
       cornerHits++;
-      celebrateCornerHit();
+      // Keep corner collision handling separate from decorative effects.
       cornerCount.textContent = cornerHits.toLocaleString();
       document.title = "DVD Hitting Corner Simulator · " + cornerHits + " corner hits";
     }
