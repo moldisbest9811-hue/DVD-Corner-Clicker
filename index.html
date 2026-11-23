@@ -121,12 +121,12 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
     const b=bounds();
     burst(x+b.w/2,y+b.h/2);
     screen.classList.remove("shake");void screen.offsetWidth;screen.classList.add("shake");
-    slowUntil=performance.now()+650;
+    slowUntil=performance.now()+400;
   }
   function frame(now) {
     if (!last) last = now;
     const baseDt = Math.min((now-last)/16.6667, 2.5);
-    const dt = baseDt * (now<slowUntil ? 0.35 : 1);
+    const dt = baseDt * (now<slowUntil ? 0.7 : 1);
     last = now;
     const b = bounds();
     x += vx*dt;
