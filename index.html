@@ -153,9 +153,7 @@ html,body{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
     trailPoints.push({x:x+b2.w/2,y:y+b2.h/2,life:1,hue});
     if(trailPoints.length>18) trailPoints.shift();
     drawEffects();
-    resizeCanvas();
-  ctx.fillStyle="#000";ctx.fillRect(0,0,innerWidth,innerHeight);
-  requestAnimationFrame(frame);
+    requestAnimationFrame(frame);
   }
   addEventListener("resize", () => {
     resizeCanvas();
